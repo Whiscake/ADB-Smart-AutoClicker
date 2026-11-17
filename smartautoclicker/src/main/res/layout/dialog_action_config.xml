@@ -78,6 +78,9 @@
             <include
                 android:id="@+id/include_intent_config"
                 layout="@layout/include_intent_config"/>
+            <include
+                android:id="@+id/include_adb_config"
+                layout="@layout/include_adb_config"/>
 
         </FrameLayout>
 

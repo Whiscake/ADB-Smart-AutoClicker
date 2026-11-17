@@ -144,6 +144,7 @@ class EventConfigModel(context: Context) : OverlayViewModel(context) {
                 is ActionTypeChoice.Swipe -> newDefaultSwipe(context, event.id)
                 is ActionTypeChoice.Pause -> newDefaultPause(context, event.id)
                 is ActionTypeChoice.Intent -> newDefaultIntent(context, event.id)
+                is ActionTypeChoice.Adb -> newDefaultAdb(context, event.id)
             }
 
         } ?: throw IllegalStateException("Can't create an action, event is null!")
@@ -342,4 +343,6 @@ sealed class ActionTypeChoice(title: Int, iconId: Int?): DialogChoice(title, ico
     object Pause : ActionTypeChoice(R.string.dialog_action_type_pause, R.drawable.ic_wait)
     /** Intent Action choice. */
     object Intent : ActionTypeChoice(R.string.dialog_action_type_intent, R.drawable.ic_intent)
+    /** Adb command Action choice. */
+    object Adb : ActionTypeChoice(R.string.dialog_action_type_adb, R.drawable.ic_intent)
 }

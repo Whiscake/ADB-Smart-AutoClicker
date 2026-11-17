@@ -18,6 +18,7 @@ package com.buzbuz.smartautoclicker.database.room.entity
 
 import androidx.room.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /**
  * Entity defining an action from an event.
@@ -56,6 +57,11 @@ import kotlinx.serialization.Serializable
  * @param intentAction [ActionType.INTENT] only: action for the intent.
  * @param componentName [ActionType.INTENT] only: the component to send the intent to. Null for if [isBroadcast] is true.
  * @param flags [ActionType.INTENT] only: flags for the intent as defined in [android.content.Intent].
+ *
+ * @param adbHost [ActionType.ADB] only: the address of the computer running the ADB bridge.
+ * @param adbPort [ActionType.ADB] only: the port of the ADB bridge.
+ * @param adbCommand [ActionType.ADB] only: the adb arguments to execute (without the leading "adb").
+ * @param adbToken [ActionType.ADB] only: the shared secret expected by the bridge. Never serialized in backups.
  */
 @Entity(
     tableName = "action_table",
@@ -97,6 +103,12 @@ data class ActionEntity(
     @ColumnInfo(name = "intent_action") val intentAction: String? = null,
     @ColumnInfo(name = "component_name") val componentName: String ? = null,
     @ColumnInfo(name = "flags") val flags: Int? = null,
+
+    // ActionType.ADB
+    @ColumnInfo(name = "adb_host") val adbHost: String? = null,
+    @ColumnInfo(name = "adb_port") val adbPort: Int? = null,
+    @ColumnInfo(name = "adb_command") val adbCommand: String? = null,
+    @Transient @ColumnInfo(name = "adb_token") val adbToken: String? = null,
 )
 
 /**
@@ -115,6 +127,8 @@ enum class ActionType {
     PAUSE,
     /** An Android Intent, allowing to interact with other applications. */
     INTENT,
+    /** An adb command sent to a bridge running on the host computer. */
+    ADB,
 }
 
 /** Type converter to read/write the [ActionType] into the database. */

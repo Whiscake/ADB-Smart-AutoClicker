@@ -41,4 +41,35 @@ Smart AutoClicker is an Android application allowing to automate repetitive task
 - Combine multiple conditions
 - Configure the delay before the next click
 - Modify the prority order of a click
+- Send adb commands to your computer when a condition is detected (see below)
 
+
+## ADB command action (this fork)
+
+This fork adds an **ADB command** action. When an event's conditions are detected, the app sends an adb command to a
+small bridge running on the computer that hosts your emulator (BlueStacks, etc.), which runs it with the local `adb`.
+The app lives inside the emulator, so it can't run the computer's `adb` itself.
+
+**1. Start the bridge on your computer** (Python 3.8+, no dependencies):
+
+```bash
+python3 tools/adb-bridge/adb_bridge.py --token <secret> --serial emulator-5554
+```
+
+**2. Add an ADB command action** to an event and fill in:
+
+| Field | Value |
+|---|---|
+| Bridge address | The computer as seen from the emulator: `10.0.2.2` for the Android Studio emulator, usually the computer's LAN IP for BlueStacks |
+| Bridge port | `8765` (the bridge's `--port`) |
+| ADB command | The adb arguments without the leading `adb`, e.g. `shell input keyevent 4` |
+| Bridge token | The `--token` you started the bridge with |
+
+**Protocol:** the app sends `POST http://<address>:<port>/adb` with the header `X-Adb-Bridge-Token` and the form field
+`command`. A failed request is logged and never interrupts the scenario. You can write your own bridge, for example
+one that only accepts the few commands you need.
+
+**Security:** anyone who has the token can control the device, and the traffic is plain HTTP, so only run the bridge on
+a network you trust. The bundled bridge never uses a shell and refuses adb sub-commands that act on the computer
+(`connect`, `forward`, `kill-server`, ...). The token is never written to scenario backups, so enter it again after
+importing one.

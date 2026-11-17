@@ -258,6 +258,7 @@ internal class ScenarioSerializer {
             ActionType.SWIPE -> deserializeSwipeActionCompat()
             ActionType.PAUSE -> deserializePauseActionCompat()
             ActionType.INTENT -> deserializeIntentActionCompat()
+            ActionType.ADB -> deserializeAdbActionCompat()
             null -> null
         }
 
@@ -353,6 +354,25 @@ internal class ScenarioSerializer {
         )
     }
 
+    /** @return the deserialized adb action. The token is never part of a backup and must be set again by the user. */
+    @VisibleForTesting
+    internal fun JsonObject.deserializeAdbActionCompat(): ActionEntity? {
+        val id = getLong("id", true) ?: return null
+        val eventId = getLong("eventId", true) ?: return null
+        val command = getString("adbCommand", true) ?: return null
+
+        return ActionEntity(
+            id = id,
+            eventId = eventId,
+            name = getString("name") ?: "",
+            priority = getInt("priority")?.coerceAtLeast(0) ?: 0,
+            type = ActionType.ADB,
+            adbHost = getString("adbHost") ?: DEFAULT_ADB_HOST,
+            adbPort = getInt("adbPort") ?: DEFAULT_ADB_PORT,
+            adbCommand = command,
+        )
+    }
+
     /** @return the deserialized intent extra. */
     @VisibleForTesting
     internal fun JsonArray.deserializeIntentExtrasCompat(): List<IntentExtraEntity> = mapNotNull { extra ->
@@ -408,3 +428,7 @@ const val DEFAULT_PAUSE_DURATION = 50L
 
 /** Tag for logs. */
 private const val TAG = "ScenarioDeserializer"
+/** Default address of the host computer as seen from an Android emulator (the AVD alias). */
+const val DEFAULT_ADB_HOST = "10.0.2.2"
+/** Default port of the ADB bridge. */
+const val DEFAULT_ADB_PORT = 8765

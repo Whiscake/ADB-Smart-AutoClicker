@@ -128,6 +128,7 @@ class ActionCopyModel(context: Context) : OverlayViewModel(context) {
             is Action.Swipe -> action.copy(id = 0, name = "" + action.name)
             is Action.Pause -> action.copy(id = 0, name = "" + action.name)
             is Action.Intent -> action.copy(id = 0, name = "" + action.name)
+            is Action.Adb -> action.copy(id = 0, name = "" + action.name)
         }
 
     /** @return the [ActionCopyItem.ActionItem] corresponding to this action. */
@@ -166,6 +167,12 @@ class ActionCopyModel(context: Context) : OverlayViewModel(context) {
                 icon = R.drawable.ic_intent,
                 name = name!!,
                 details = formatIntentDetails(this),
+            )
+
+            is Action.Adb -> ActionCopyItem.ActionItem(
+                icon = R.drawable.ic_intent,
+                name = name!!,
+                details = context.getString(R.string.dialog_action_copy_adb_details, command),
             )
         }
 

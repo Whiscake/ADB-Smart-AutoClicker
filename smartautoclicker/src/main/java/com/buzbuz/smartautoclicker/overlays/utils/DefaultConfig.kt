@@ -108,6 +108,19 @@ fun newDefaultPause(context: Context, eventId: Long) = Action.Pause(
 )
 
 /**
+ * Creates a new default adb command action.
+ * @param context the Android context.
+ * @param eventId the event for this new action.
+ * @return the new adb command.
+ */
+fun newDefaultAdb(context: Context, eventId: Long) = Action.Adb(
+    eventId = eventId,
+    name = context.getString(R.string.default_adb_name),
+    host = "10.0.2.2",
+    port = 8765,
+)
+
+/**
  * Creates a new default intent action.
  * @param context the Android context.
  * @param eventId the event for this new action.

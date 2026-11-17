@@ -36,6 +36,7 @@ fun Action.getIconRes() : Int =
         is Action.Swipe -> R.drawable.ic_swipe
         is Action.Pause -> R.drawable.ic_wait_aligned
         is Action.Intent -> R.drawable.ic_intent
+        is Action.Adb -> R.drawable.ic_intent
     }
 
 /** @param color the tint color to apply to the ImageView. */

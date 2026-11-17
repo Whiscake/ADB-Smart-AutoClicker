@@ -32,6 +32,8 @@ import com.buzbuz.smartautoclicker.baseui.dialog.OverlayDialogController
 import com.buzbuz.smartautoclicker.baseui.dialog.setCustomTitle
 import com.buzbuz.smartautoclicker.domain.Action
 import com.buzbuz.smartautoclicker.databinding.DialogActionConfigBinding
+import com.buzbuz.smartautoclicker.overlays.eventconfig.action.adb.AdbConfigModel
+import com.buzbuz.smartautoclicker.overlays.eventconfig.action.adb.setupAdbUi
 import com.buzbuz.smartautoclicker.overlays.eventconfig.action.click.ClickConfigModel
 import com.buzbuz.smartautoclicker.overlays.eventconfig.action.click.setupClickUi
 import com.buzbuz.smartautoclicker.overlays.eventconfig.action.intent.IntentConfigModel
@@ -76,6 +78,7 @@ class ActionConfigDialog(
         is Action.Swipe -> R.string.dialog_action_type_swipe to R.drawable.ic_swipe
         is Action.Pause -> R.string.dialog_action_type_pause to R.drawable.ic_wait
         is Action.Intent -> R.string.dialog_action_type_intent to R.drawable.ic_intent
+        is Action.Adb -> R.string.dialog_action_type_adb to R.drawable.ic_intent
     }
 
     override fun onCreateDialog(): AlertDialog.Builder {
@@ -129,6 +132,9 @@ class ActionConfigDialog(
                                 context, actionValues, this@ActionConfigDialog, lifecycleScope, ::showSubOverlay
                             )
                             is PauseConfigModel -> viewBinding.includePauseConfig.setupPauseUi(
+                                actionValues, this@ActionConfigDialog, lifecycleScope
+                            )
+                            is AdbConfigModel -> viewBinding.includeAdbConfig.setupAdbUi(
                                 actionValues, this@ActionConfigDialog, lifecycleScope
                             )
                             is IntentConfigModel -> viewBinding.includeIntentConfig.setupIntentUi(

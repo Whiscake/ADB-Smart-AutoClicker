@@ -59,7 +59,8 @@ import com.buzbuz.smartautoclicker.database.room.migrations.*
     version = CLICK_DATABASE_VERSION,
     exportSchema = true,
     autoMigrations = [
-        AutoMigration (from = 7, to = 8)
+        AutoMigration (from = 7, to = 8),
+        AutoMigration (from = 8, to = 9),
     ]
 )
 @TypeConverters(ActionTypeStringConverter::class, IntentExtraTypeStringConverter::class)
@@ -112,4 +113,4 @@ abstract class ClickDatabase : RoomDatabase() {
 }
 
 /** Current version of the database. */
-const val CLICK_DATABASE_VERSION = 8
+const val CLICK_DATABASE_VERSION = 9

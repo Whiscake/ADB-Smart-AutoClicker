@@ -23,6 +23,7 @@ import android.util.Log
 import com.buzbuz.smartautoclicker.R
 import com.buzbuz.smartautoclicker.baseui.OverlayViewModel
 import com.buzbuz.smartautoclicker.domain.Action
+import com.buzbuz.smartautoclicker.overlays.eventconfig.action.adb.AdbConfigModel
 import com.buzbuz.smartautoclicker.overlays.eventconfig.action.click.ClickConfigModel
 import com.buzbuz.smartautoclicker.overlays.eventconfig.action.intent.IntentConfigModel
 import com.buzbuz.smartautoclicker.overlays.eventconfig.action.pause.PauseConfigModel
@@ -73,6 +74,7 @@ class ActionConfigModel(context: Context) : OverlayViewModel(context) {
                 is Action.Swipe -> SwipeConfigModel(viewModelScope, configuredAction)
                 is Action.Pause -> PauseConfigModel(viewModelScope, configuredAction)
                 is Action.Intent -> IntentConfigModel(viewModelScope, configuredAction, context.packageManager)
+                is Action.Adb -> AdbConfigModel(viewModelScope, configuredAction)
             }
         }
         .take(1)
@@ -108,6 +110,7 @@ class ActionConfigModel(context: Context) : OverlayViewModel(context) {
                 is Action.Swipe ->  configuredAction.emit(action.copy(name = "" + name))
                 is Action.Pause ->  configuredAction.emit(action.copy(name = "" + name))
                 is Action.Intent ->  configuredAction.emit(action.copy(name = "" + name))
+                is Action.Adb ->  configuredAction.emit(action.copy(name = "" + name))
                 else -> Log.w(TAG, "Can't set name, invalid action type $action")
             }
         }

@@ -32,6 +32,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
+
 /**
  * Execute the actions of an event.
  *
@@ -51,6 +55,7 @@ internal class ActionExecutor(private val androidExecutor: AndroidExecutor) {
                 is Swipe -> executeSwipe(action)
                 is Pause -> executePause(action)
                 is Action.Intent -> executeIntent(action)
+                is Action.Adb -> executeAdb(action)
             }
         }
     }
@@ -135,6 +140,40 @@ internal class ActionExecutor(private val androidExecutor: AndroidExecutor) {
             delay(INTENT_START_ACTIVITY_DELAY)
         }
     }
+
+    /**
+     * Send the provided adb command to the bridge running on the host computer.
+     * A failure is logged and never interrupts the scenario.
+     * @param adb the adb command to be sent.
+     */
+    private suspend fun executeAdb(adb: Action.Adb) {
+        withContext(Dispatchers.IO) {
+            var connection: HttpURLConnection? = null
+            try {
+                connection = (URL("http", adb.host!!, adb.port!!, "/adb").openConnection() as HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    doOutput = true
+                    connectTimeout = ADB_CONNECT_TIMEOUT
+                    readTimeout = ADB_READ_TIMEOUT
+                    setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                    adb.token?.let { setRequestProperty("X-Adb-Bridge-Token", it) }
+                }
+                val body = "command=" + URLEncoder.encode(adb.command!!, "UTF-8")
+                connection.outputStream.use { it.write(body.toByteArray()) }
+
+                val response = (if (connection.responseCode < 400) connection.inputStream else connection.errorStream)
+                    ?.bufferedReader()?.use { it.readText() }
+                if (connection.responseCode >= 400) {
+                    Log.w(TAG, "Adb bridge rejected the command (${connection.responseCode}): $response")
+                }
+            } catch (ex: Exception) {
+                Log.w(TAG, "Can't send adb command to ${adb.host}:${adb.port}", ex)
+            } finally {
+                connection?.disconnect()
+            }
+            Unit
+        }
+    }
 }
 
 /** Execute the actions related to Android. */
@@ -156,3 +195,7 @@ private const val TAG = "ActionExecutor"
 private const val INTENT_START_ACTIVITY_DELAY = 1000L
 /** Waiting delay after a broadcast to avoid overflowing the system. */
 private const val INTENT_BROADCAST_DELAY = 100L
+/** Connection timeout to the adb bridge, in milliseconds. */
+private const val ADB_CONNECT_TIMEOUT = 3000
+/** Maximum time to wait for the adb bridge to run the command, in milliseconds. */
+private const val ADB_READ_TIMEOUT = 15000

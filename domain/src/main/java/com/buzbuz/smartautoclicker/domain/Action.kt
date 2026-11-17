@@ -239,6 +239,58 @@ sealed class Action {
 
         override fun deepCopy(): Intent = copy(name = "" + name)
     }
+
+    /**
+     * Adb command action.
+     *
+     * The command is sent over HTTP to a bridge running on the computer hosting the emulator, which runs it with adb.
+     *
+     * @param id the unique identifier for the action. Use 0 for creating a new action. Default value is 0.
+     * @param eventId the identifier of the event for this action.
+     * @param name the name of the action.
+     * @param host the address of the computer running the bridge, as seen from the emulator.
+     * @param port the port of the bridge.
+     * @param command the adb arguments, without the leading "adb". Ex: "shell input keyevent 4".
+     * @param token the shared secret expected by the bridge.
+     */
+    data class Adb(
+        override var id: Long = 0,
+        override var eventId: Long,
+        override var name: String? = null,
+        var host: String? = null,
+        var port: Int? = null,
+        var command: String? = null,
+        var token: String? = null,
+    ) : Action() {
+
+        override fun isComplete(): Boolean =
+            super.isComplete() && !host.isNullOrBlank() && port != null && !command.isNullOrBlank()
+
+        override fun toEntity(): CompleteActionEntity {
+            if (!isComplete()) throw IllegalStateException("Can't transform to entity, Adb is incomplete.")
+
+            return CompleteActionEntity(
+                action = ActionEntity(
+                    id = id,
+                    eventId = eventId,
+                    name = name!!,
+                    type = ActionType.ADB,
+                    adbHost = host,
+                    adbPort = port,
+                    adbCommand = command,
+                    adbToken = token,
+                ),
+                intentExtras = emptyList(),
+            )
+        }
+
+        override fun cleanUpIds() {
+            id = 0
+            eventId = 0
+        }
+
+        override fun deepCopy(): Adb = copy(name = "" + name)
+    }
 }
 
 /** Convert an Action entity into a Domain Action. */
@@ -274,5 +326,10 @@ internal fun CompleteActionEntity.toAction(): Action {
                 intentExtras.map { it.toIntentExtra() }.toMutableList()
             )
         }
+
+        ActionType.ADB -> Action.Adb(
+            action.id, action.eventId, action.name,
+            action.adbHost, action.adbPort, action.adbCommand, action.adbToken
+        )
     }
 }
