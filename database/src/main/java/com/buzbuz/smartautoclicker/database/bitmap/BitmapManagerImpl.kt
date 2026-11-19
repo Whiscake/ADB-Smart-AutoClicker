@@ -59,8 +59,13 @@ internal class BitmapManagerImpl(private val appDataDir: File) : BitmapManager {
         bitmap.copyPixelsToBuffer(uncompressedBuffer)
         uncompressedBuffer.position(0)
 
-        val path = "$CLICK_CONDITION_FILE_PREFIX${uncompressedBuffer.hashCode()}"
-        val file = File(appDataDir, path)
+        var id = uncompressedBuffer.hashCode()
+        var file = File(appDataDir, "$CLICK_CONDITION_FILE_PREFIX$id")
+        while (withContext(Dispatchers.IO) { file.exists() && !file.holds(uncompressedBuffer) }) {
+            id++
+            file = File(appDataDir, "$CLICK_CONDITION_FILE_PREFIX$id")
+        }
+        val path = file.name
         if (!file.exists()) {
             Log.d(TAG, "Saving $path")
 
@@ -116,6 +121,10 @@ internal class BitmapManagerImpl(private val appDataDir: File) : BitmapManager {
             file.delete()
         }
     }
+
+    /** Two different images can share a hash: a file only stands for this bitmap if its bytes are the same. */
+    private fun File.holds(buffer: ByteBuffer): Boolean =
+        length() == buffer.remaining().toLong() && ByteBuffer.wrap(readBytes()) == buffer.duplicate()
 
     override fun releaseCache() {
         memoryCache.evictAll()

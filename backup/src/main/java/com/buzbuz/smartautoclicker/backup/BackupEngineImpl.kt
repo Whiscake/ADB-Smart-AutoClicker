@@ -22,7 +22,6 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
 
-import com.buzbuz.smartautoclicker.backup.ext.readEntryFile
 import com.buzbuz.smartautoclicker.backup.ext.writeEntryFile
 import com.buzbuz.smartautoclicker.database.bitmap.CLICK_CONDITION_FILE_PREFIX
 import com.buzbuz.smartautoclicker.database.room.entity.CompleteScenario
@@ -167,6 +166,7 @@ internal class BackupEngineImpl(
         progress.onProgressChanged(0, null)
 
         val scenarioList = mutableListOf<CompleteScenario>()
+        val renamedConditions = mutableMapOf<String, String>()
         withContext(Dispatchers.IO) {
             try {
                 ZipInputStream(contentResolver.openInputStream(zipFileUri)).use { zipStream ->
@@ -194,7 +194,7 @@ internal class BackupEngineImpl(
 
                                 zipEntry.name.matches(conditionUnzipMatchRegex) -> {
                                     Log.d(TAG, "Extract condition file ${zipEntry.name}.")
-                                    extractConditionFromZip(zipStream, zipEntry)
+                                    extractConditionFromZip(zipStream, zipEntry, renamedConditions)
                                 }
 
                                 else -> { /* Ignore other files */ }
@@ -203,7 +203,7 @@ internal class BackupEngineImpl(
                 }
 
                 progress.onVerification?.invoke()
-                val validScenarios = scenarioList.mapNotNull { scenario ->
+                val validScenarios = scenarioList.map { it.withRenamedConditions(renamedConditions) }.mapNotNull { scenario ->
                     if (verifyExtractedScenario(scenario)) {
                         scenario
                     } else {
@@ -227,26 +227,40 @@ internal class BackupEngineImpl(
      * @param zipStream the input stream the get the file from.
      * @param zipEntry the entry corresponding to the file.
      */
-    private fun extractConditionFromZip(zipStream: ZipInputStream, zipEntry: ZipEntry) {
-        val conditionFile = File(
-            appDataDir,
-            zipEntry.name.let { name ->
-                val startIndex = name.lastIndexOf('/') + 1
-                if (startIndex > 0) {
-                    name.substring(startIndex)
-                } else {
-                    Log.w(TAG, "Invalid condition path.")
-                    return
-                }
-            }
-        )
-
-        if (!conditionFile.exists()) {
-            zipStream.readEntryFile(conditionFile)
-        } else {
-            Log.d(TAG, "Condition already exist, skip it.")
+    private fun extractConditionFromZip(
+        zipStream: ZipInputStream,
+        zipEntry: ZipEntry,
+        renamed: MutableMap<String, String>,
+    ) {
+        val name = zipEntry.name.substringAfterLast('/')
+        var id = name.removePrefix(CLICK_CONDITION_FILE_PREFIX).toIntOrNull() ?: run {
+            Log.w(TAG, "Invalid condition path.")
+            return
         }
+
+        val content = zipStream.readBytes()
+        var conditionFile = File(appDataDir, name)
+        while (conditionFile.exists() && !conditionFile.readBytes().contentEquals(content)) {
+            id++
+            conditionFile = File(appDataDir, "$CLICK_CONDITION_FILE_PREFIX$id")
+        }
+
+        if (conditionFile.exists()) {
+            Log.d(TAG, "Condition already exist, skip it.")
+        } else {
+            conditionFile.writeBytes(content)
+        }
+        if (conditionFile.name != name) renamed[zipEntry.name] = conditionFile.name
     }
+
+    /** Points the conditions of this scenario at the files their images were stored under, when it changed. */
+    private fun CompleteScenario.withRenamedConditions(renamed: Map<String, String>): CompleteScenario =
+        if (renamed.isEmpty()) this
+        else copy(events = events.map { event ->
+            event.copy(conditions = event.conditions.map { condition ->
+                renamed["${scenario.id}/${condition.path}"]?.let { condition.copy(path = it) } ?: condition
+            })
+        })
 
     /**
      * Verifies if the scenario extracted is correctly formed.
