@@ -32,6 +32,7 @@
 
     <string-array name="news_fixes" translatable="false">
         <item>Tapping a config while selecting configs to export or delete selects it instead of starting it</item>
+        <item>The floating menu opens in the top right corner until you move it</item>
         <item>Two condition images with the same hash no longer replace each other when saving or importing</item>
         <item>A config downloaded from the Library takes the resolution written in the library; other imports no longer guess it</item>
     </string-array>

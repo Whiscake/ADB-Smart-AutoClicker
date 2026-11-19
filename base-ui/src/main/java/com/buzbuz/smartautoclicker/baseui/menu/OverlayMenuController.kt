@@ -353,19 +353,19 @@ abstract class OverlayMenuController(context: Context) : OverlayController(conte
     }
 
     /**
-     * Load last user menu position for the current orientation, if any.
+     * Load last user menu position for the current orientation, or the top right corner if there is none.
      *
      * @param orientation the orientation to load the position for.
      */
     private fun loadMenuPosition(orientation: Int) {
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setMenuLayoutPosition(
-                sharedPreferences.getInt(PREFERENCE_MENU_X_LANDSCAPE_KEY, 0),
+                sharedPreferences.getInt(PREFERENCE_MENU_X_LANDSCAPE_KEY, Int.MAX_VALUE),
                 sharedPreferences.getInt(PREFERENCE_MENU_Y_LANDSCAPE_KEY, 0)
             )
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             setMenuLayoutPosition(
-                sharedPreferences.getInt(PREFERENCE_MENU_X_PORTRAIT_KEY, 0),
+                sharedPreferences.getInt(PREFERENCE_MENU_X_PORTRAIT_KEY, Int.MAX_VALUE),
                 sharedPreferences.getInt(PREFERENCE_MENU_Y_PORTRAIT_KEY, 0)
             )
         }

@@ -6,6 +6,19 @@
 
 <br>
  
+## Safety and performance
+
+The clicker is light: detection pauses when the screen has nothing new, so it uses little processor and battery.
+It only reads the screen to find your images, and only contacts the computer you set as bridge and, for the
+library and the version check, GitHub. The code is open: you can read it, ask an AI assistant to review it, scan the
+APK on [VirusTotal](https://www.virustotal.com), or build it yourself. If you have any doubt, ask the authors, Whiscake
+and barone138, directly on Discord: both are known in the YKWPP community.
+
+**Keep the bridge token to yourself.** The token lets whoever has it send commands to the bridge on your computer:
+with the bundled `adb_bridge.py` that means adb commands on your device. Don't post it, and hide it before sharing a
+screenshot (the settings show it as dots until you tap the eye). If you shared it, change it: with ADB-YKWP-Dual,
+delete the `token` in its `settings.json` and restart it; with the bundled bridge, start it with a new `--token`.
+
 ## Introduction
 
 Smart AutoClicker is an Android application allowing to automate repetitive task by clicking automatically for you on the screen. Unlike the regular auto clicker application, the clicks aren't based on timers to execute the clicks. Instead, it allows you to capture an image from a part of your screen and execute the click once this image is detected again.
@@ -31,7 +44,6 @@ Smart AutoClicker is an Android application allowing to automate repetitive task
 </p>
 <br>
 
-
 ## Features
 
 - Organize clicks by scenario
@@ -47,7 +59,6 @@ Smart AutoClicker is an Android application allowing to automate repetitive task
 
 **Download:** [smartautoclicker.apk](https://github.com/barone138/ykwp-clicker-library/releases/latest/download/smartautoclicker.apk) (latest version). If another build of the clicker is already installed and
 Android refuses the update, export your configs, uninstall it, install this one and import them again.
-
 
 ## What this fork adds (1.6.0)
 
@@ -70,6 +81,7 @@ Android refuses the update, export your configs, uninstall it, install this one 
 
 **Fixes**
 - Tapping a config while selecting configs to export or delete selects it instead of starting it.
+- The floating menu opens in the top right corner until you move it, where most configs expect it.
 - Two condition images with the same hash no longer replace each other when saving or importing.
 - A config imported from a backup no longer gets a guessed resolution.
 
@@ -79,7 +91,6 @@ Android refuses the update, export your configs, uninstall it, install this one 
 - A whole-screen condition bigger than the screen and a damaged condition image no longer close the app.
 - Detection waits a little when there is no new screen image or after an error, instead of using the processor for
   nothing.
-
 
 ## ADB command action (this fork)
 
@@ -113,11 +124,3 @@ With ADB-YKWP-Dual you don't need the bridge above: the program links the clicke
 a network you trust. The bundled bridge never uses a shell and refuses adb sub-commands that act on the computer
 (`connect`, `forward`, `kill-server`, ...). The token is never written to scenario backups, so enter it again after
 importing one.
-
-
-## Safety
-
-The clicker only reads the screen to find your images, and only contacts the computer you set as bridge and, for the
-library and the version check, GitHub. The code is open: you can read it, ask an AI assistant to review it, scan the
-APK on [VirusTotal](https://www.virustotal.com), or build it yourself. If you have any doubt, ask the authors, Whiscake
-and barone138, directly on Discord: both are known in the YKWPP community.
