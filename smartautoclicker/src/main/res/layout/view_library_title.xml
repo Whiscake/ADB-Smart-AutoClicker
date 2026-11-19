@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2026 Whiscake
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http://www.gnu.org/licenses/>.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/library">
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/DialogTitle"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:singleLine="true"
+        android:ellipsize="end"
+        tools:text="@string/dialog_library_title"/>
+
+    <ImageView
+        android:id="@+id/btn_filter"
+        android:layout_width="@dimen/item_height"
+        android:layout_height="@dimen/item_height"
+        android:scaleType="center"
+        android:src="@drawable/ic_filter"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/dialog_library_filters"
+        app:tint="@color/textTitle"/>
+
+</LinearLayout>

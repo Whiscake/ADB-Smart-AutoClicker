@@ -177,7 +177,7 @@ internal class BackupEngineImpl(
                                     Log.d(TAG, "Extract scenario file ${zipEntry.name}.")
 
                                     scenarioSerializer.deserialize(zipStream)?.let { backup ->
-                                        scenarioList.add(backup.scenario)
+                                        scenarioList.add(backup.scenario.withScreenFallback(backup))
 
                                         if (!screenCompatWarning) {
                                             screenCompatWarning =
@@ -254,6 +254,15 @@ internal class BackupEngineImpl(
     }
 
     /** Points the conditions of this scenario at the files their images were stored under, when it changed. */
+    /**
+     * Backups made before scenarios kept their resolution only know the screen of the device that made them, which is
+     * the resolution the scenario was made for.
+     */
+    private fun CompleteScenario.withScreenFallback(backup: ScenarioBackup): CompleteScenario =
+        if ((scenario.screenWidth > 0 && scenario.screenHeight > 0) || backup.screenWidth <= 0 || backup.screenHeight <= 0)
+            this
+        else copy(scenario = scenario.copy(screenWidth = backup.screenWidth, screenHeight = backup.screenHeight))
+
     private fun CompleteScenario.withRenamedConditions(renamed: Map<String, String>): CompleteScenario =
         if (renamed.isEmpty()) this
         else copy(events = events.map { event ->

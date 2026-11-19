@@ -198,6 +198,16 @@
     <string name="dialog_library_refresh">Actualiser</string>
     <string name="dialog_library_empty">Aucune configuration dans la bibliothèque.</string>
     <string name="dialog_library_error">Bibliothèque injoignable : %1$s</string>
-    <string name="dialog_library_screen_fits">%1$dx%2$d, cet écran</string>
     <string name="dialog_settings_library_title">Adresse de la bibliothèque</string>
+    <string name="dialog_library_search">Rechercher nom, auteur, tag…</string>
+    <string name="dialog_library_filters">Filtres</string>
+    <string name="dialog_library_clear_filters">Effacer les filtres</string>
+    <string name="dialog_library_all">Tous</string>
+    <string name="dialog_library_resolution">Résolution</string>
+    <string name="dialog_library_author">Auteur</string>
+    <string name="dialog_library_events">Événements</string>
+    <string name="dialog_library_tags">Tags</string>
+    <string name="dialog_library_description">Description</string>
+    <string name="dialog_library_info">Infos</string>
+    <string name="dialog_library_no_match">Aucune configuration ne correspond.</string>
 </resources>

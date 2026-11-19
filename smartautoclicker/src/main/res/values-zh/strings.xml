@@ -226,6 +226,16 @@
     <string name="dialog_library_refresh">刷新</string>
     <string name="dialog_library_empty">配置库中还没有配置。</string>
     <string name="dialog_library_error">无法连接配置库：%1$s</string>
-    <string name="dialog_library_screen_fits">%1$dx%2$d，当前屏幕</string>
     <string name="dialog_settings_library_title">配置库地址</string>
+    <string name="dialog_library_search">搜索名称、作者、标签…</string>
+    <string name="dialog_library_filters">筛选</string>
+    <string name="dialog_library_clear_filters">清除筛选</string>
+    <string name="dialog_library_all">全部</string>
+    <string name="dialog_library_resolution">分辨率</string>
+    <string name="dialog_library_author">作者</string>
+    <string name="dialog_library_events">事件</string>
+    <string name="dialog_library_tags">标签</string>
+    <string name="dialog_library_description">描述</string>
+    <string name="dialog_library_info">信息</string>
+    <string name="dialog_library_no_match">没有匹配的配置。</string>
 </resources>

@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+import org.json.JSONArray
 import org.json.JSONObject
 
 import java.io.File
@@ -45,8 +46,28 @@ data class LibraryConfig(
     val author: String,
     val screen: Point?,
     val events: Int,
+    val tags: List<String>,
     val url: String,
 )
+
+/** What the library list is narrowed to: a text searched everywhere, then the advanced filters. */
+data class LibraryFilter(
+    val query: String = "",
+    val screen: Point? = null,
+    val author: String? = null,
+    val tags: Set<String> = emptySet(),
+) {
+    val isAdvanced: Boolean get() = screen != null || author != null || tags.isNotEmpty()
+
+    fun matches(config: LibraryConfig): Boolean =
+        (screen == null || config.screen == screen) &&
+            (author == null || config.author.equals(author, ignoreCase = true)) &&
+            (tags.isEmpty() || config.tags.any { it in tags }) &&
+            (query.isBlank() || query.trim().let { text ->
+                listOf(config.name, config.description, config.author, *config.tags.toTypedArray())
+                    .any { it.contains(text, ignoreCase = true) }
+            })
+}
 
 sealed class LibraryState {
     object Loading : LibraryState()
@@ -60,7 +81,10 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
     private val _state = MutableStateFlow<LibraryState>(LibraryState.Loading)
     val state: StateFlow<LibraryState> = _state
 
-    val screen: Point = ScreenMetrics(application.applicationContext).screenSize.let {
+    private val _filter = MutableStateFlow(LibraryFilter())
+    val filter: StateFlow<LibraryFilter> = _filter
+
+    private val screen: Point = ScreenMetrics(application.applicationContext).screenSize.let {
         Point(minOf(it.x, it.y), maxOf(it.x, it.y))
     }
 
@@ -75,6 +99,10 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
                 LibraryState.Error(ex.message ?: ex.javaClass.simpleName)
             }
         }
+    }
+
+    fun setFilter(filter: LibraryFilter) {
+        _filter.value = filter
     }
 
     fun download(config: LibraryConfig) {
@@ -106,6 +134,7 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
                         screen = optString("screen").split("x").mapNotNull { it.trim().toIntOrNull() }
                             .takeIf { it.size == 2 }?.let { (w, h) -> Point(minOf(w, h), maxOf(w, h)) },
                         events = optInt("events"),
+                        tags = optJSONArray("tags").strings().map(LibraryTags::canonical).distinct(),
                         url = URL(URL(indexUrl), getString("file")).toString(),
                     )
                 }
@@ -113,6 +142,9 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 }
+
+private fun JSONArray?.strings(): List<String> =
+    if (this == null) emptyList() else (0 until length()).mapNotNull { optString(it).trim().ifEmpty { null } }
 
 private fun URL.connect(): HttpURLConnection = (openConnection() as HttpURLConnection).apply {
     connectTimeout = TIMEOUT_MS
@@ -134,8 +166,7 @@ fun Context.setLibraryUrl(url: String) = getSharedPreferences(PREFERENCES_NAME, 
     if (custom == null) remove(KEY_URL) else putString(KEY_URL, custom)
 }.apply()
 
-const val DEFAULT_LIBRARY_URL =
-    "https://raw.githubusercontent.com/barone138/ykwp-clicker-library/main/index.json"
+const val DEFAULT_LIBRARY_URL = "https://raw.githubusercontent.com/barone138/ykwp-clicker-library/main/index.json"
 
 private const val PREFERENCES_NAME = "Library"
 private const val KEY_URL = "Index_Url"

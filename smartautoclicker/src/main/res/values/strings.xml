@@ -239,6 +239,16 @@
     <string name="dialog_library_empty">No config in the library yet.</string>
     <string name="dialog_library_error">Can\'t reach the library: %1$s</string>
     <string name="dialog_library_screen" translatable="false">%1$dx%2$d</string>
-    <string name="dialog_library_screen_fits">%1$dx%2$d, this screen</string>
     <string name="dialog_settings_library_title">Library address</string>
+    <string name="dialog_library_search">Search name, author, tag…</string>
+    <string name="dialog_library_filters">Filters</string>
+    <string name="dialog_library_clear_filters">Clear filters</string>
+    <string name="dialog_library_all">All</string>
+    <string name="dialog_library_resolution">Resolution</string>
+    <string name="dialog_library_author">Author</string>
+    <string name="dialog_library_events">Events</string>
+    <string name="dialog_library_tags">Tags</string>
+    <string name="dialog_library_description">Description</string>
+    <string name="dialog_library_info">Info</string>
+    <string name="dialog_library_no_match">No config matches the search.</string>
 </resources>
