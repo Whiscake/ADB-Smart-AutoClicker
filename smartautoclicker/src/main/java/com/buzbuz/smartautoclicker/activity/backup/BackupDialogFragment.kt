@@ -18,6 +18,7 @@ package com.buzbuz.smartautoclicker.activity.backup
 
 import android.app.Dialog
 import android.content.Intent
+import android.graphics.Point
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -50,10 +51,15 @@ class BackupDialogFragment : DialogFragment() {
         /** Key for this fragment argument. Contains the list of scenario identifier to export (LongArray). */
         private const val FRAGMENT_ARG_KEY_SCENARIO_LIST = ":backup:fragment_args_key_scenario_list"
         private const val FRAGMENT_ARG_KEY_IMPORT_FILE = ":backup:fragment_args_key_import_file"
+        private const val FRAGMENT_ARG_KEY_IMPORT_SCREEN = ":backup:fragment_args_key_import_screen"
 
-        /** Creates an import that starts right away from [file], with no file to pick. */
-        fun newImport(file: Uri) : BackupDialogFragment = newInstance(true).apply {
+        /**
+         * Creates an import that starts right away from [file], with no file to pick. The imported scenarios with no
+         * resolution get [screen].
+         */
+        fun newImport(file: Uri, screen: Point? = null) : BackupDialogFragment = newInstance(true).apply {
             requireArguments().putParcelable(FRAGMENT_ARG_KEY_IMPORT_FILE, file)
+            requireArguments().putParcelable(FRAGMENT_ARG_KEY_IMPORT_SCREEN, screen)
         }
 
         /**
@@ -93,7 +99,11 @@ class BackupDialogFragment : DialogFragment() {
 
         backupViewModel.initialize(isImport)
         if (savedInstanceState == null) {
-            arguments?.getParcelable<Uri>(FRAGMENT_ARG_KEY_IMPORT_FILE)?.let { backupViewModel.startBackup(it, true) }
+            arguments?.getParcelable<Uri>(FRAGMENT_ARG_KEY_IMPORT_FILE)?.let { file ->
+                backupViewModel.startBackup(
+                    file, true, screen = arguments?.getParcelable(FRAGMENT_ARG_KEY_IMPORT_SCREEN)
+                )
+            }
         }
 
         backupActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->

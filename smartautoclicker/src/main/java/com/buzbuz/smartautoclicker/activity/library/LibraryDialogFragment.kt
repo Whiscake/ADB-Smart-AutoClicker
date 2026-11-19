@@ -130,7 +130,7 @@ class LibraryDialogFragment : DialogFragment() {
                     empty.text = getString(R.string.dialog_library_error, state.reason)
                 }
                 is LibraryState.Downloaded -> {
-                    BackupDialogFragment.newImport(state.file)
+                    BackupDialogFragment.newImport(state.file, state.screen)
                         .show(parentFragmentManager, BackupDialogFragment.FRAGMENT_TAG_BACKUP_DIALOG)
                     dismiss()
                 }

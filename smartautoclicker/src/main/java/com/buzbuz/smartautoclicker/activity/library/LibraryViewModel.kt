@@ -73,7 +73,7 @@ sealed class LibraryState {
     object Loading : LibraryState()
     data class Loaded(val configs: List<LibraryConfig>, val downloading: LibraryConfig? = null) : LibraryState()
     data class Error(val reason: String) : LibraryState()
-    data class Downloaded(val file: Uri) : LibraryState()
+    data class Downloaded(val file: Uri, val screen: Point?) : LibraryState()
 }
 
 class LibraryViewModel(application: Application) : AndroidViewModel(application) {
@@ -113,7 +113,7 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
                 val file = withContext(Dispatchers.IO) {
                     File(application().cacheDir, LIBRARY_FILE).also { URL(config.url).download(it) }
                 }
-                LibraryState.Downloaded(Uri.fromFile(file))
+                LibraryState.Downloaded(Uri.fromFile(file), config.screen)
             } catch (ex: Exception) {
                 LibraryState.Error(ex.message ?: ex.javaClass.simpleName)
             }
