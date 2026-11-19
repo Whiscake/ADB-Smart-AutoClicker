@@ -21,6 +21,7 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 
 import com.buzbuz.smartautoclicker.R
+import com.buzbuz.smartautoclicker.baseui.ScreenMetrics
 import com.buzbuz.smartautoclicker.domain.*
 
 /**
@@ -29,11 +30,15 @@ import com.buzbuz.smartautoclicker.domain.*
  * @param context the Android context.
  * @return the new event.
  */
-fun newDefaultScenario(context: Context, scenarioName: String) = Scenario(
-    name = scenarioName,
-    detectionQuality = context.resources.getInteger(R.integer.default_detection_quality),
-    endConditionOperator = OR,
-)
+fun newDefaultScenario(context: Context, scenarioName: String) = ScreenMetrics(context).screenSize.let { screen ->
+    Scenario(
+        name = scenarioName,
+        detectionQuality = context.resources.getInteger(R.integer.default_detection_quality),
+        endConditionOperator = OR,
+        screenWidth = screen.x,
+        screenHeight = screen.y,
+    )
+}
 
 /**
  * Creates a new event.
@@ -116,8 +121,6 @@ fun newDefaultPause(context: Context, eventId: Long) = Action.Pause(
 fun newDefaultAdb(context: Context, eventId: Long) = Action.Adb(
     eventId = eventId,
     name = context.getString(R.string.default_adb_name),
-    host = "10.0.2.2",
-    port = 8765,
 )
 
 /**

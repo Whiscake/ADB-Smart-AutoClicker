@@ -37,6 +37,7 @@ import com.buzbuz.smartautoclicker.overlays.mainmenu.MainMenu
 import com.buzbuz.smartautoclicker.domain.Scenario
 import com.buzbuz.smartautoclicker.engine.AndroidExecutor
 import com.buzbuz.smartautoclicker.engine.DetectorEngine
+import com.buzbuz.smartautoclicker.engine.setLastScenarioId
 
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -93,6 +94,8 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
     private var rootOverlayController: OverlayController? = null
     /** True if the overlay is started, false if not. */
     private var isStarted: Boolean = false
+    /** The scenario the overlay was started with. */
+    private var startedScenarioId: Long? = null
 
     /** Local interface providing an API for the [SmartAutoClickerService]. */
     inner class LocalService {
@@ -110,18 +113,28 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
          * @param data the data intent provided by the screen capture intent activity result callback
          * [android.app.Activity.onActivityResult]
          * @param scenario the identifier of the scenario of clicks to be used for detection.
+         * @param autoPlay start the detection once ready. When the overlay is already open, only starts the detection
+         * for the same scenario, or reopens the overlay with the new one.
          */
-        fun start(resultCode: Int, data: Intent, scenario: Scenario) {
+        fun start(resultCode: Int, data: Intent, scenario: Scenario, autoPlay: Boolean = false) {
             if (isStarted) {
-                return
+                if (!autoPlay) return
+                if (startedScenarioId == scenario.id) {
+                    detectorEngine?.startDetectionWhenReady()
+                    return
+                }
+                stop()
             }
 
             isStarted = true
+            startedScenarioId = scenario.id
             startForeground(NOTIFICATION_ID, createNotification(scenario.name))
 
             detectorEngine = DetectorEngine.getDetectorEngine(this@SmartAutoClickerService).apply {
                 startScreenRecord(this@SmartAutoClickerService, resultCode, data, scenario, this@SmartAutoClickerService)
+                if (autoPlay) startDetectionWhenReady()
             }
+            setLastScenarioId(scenario.id)
 
             rootOverlayController = MainMenu(this@SmartAutoClickerService, scenario).apply {
                 create(::stop)
@@ -135,6 +148,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
             }
 
             isStarted = false
+            startedScenarioId = null
 
             rootOverlayController?.dismiss()
             rootOverlayController = null

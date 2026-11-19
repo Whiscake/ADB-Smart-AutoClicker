@@ -21,6 +21,8 @@
     <color name="icon_background">#34D585</color>
     <color name="primaryDark">#388E3C</color>
     <color name="accent">#448AFF</color>
+    <color name="library">#0099CC</color>
+    <color name="badge">#E53935</color>
 
     <color name="textTitle">#FFFFFF</color>
     <color name="textHint">#88FFFFFF</color>

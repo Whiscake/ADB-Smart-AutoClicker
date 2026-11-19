@@ -24,6 +24,13 @@
         <item name="autoCompleteTextViewStyle">@style/SearchView</item>
     </style>
 
+    <style name="InvisibleTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorPrimary">@color/textTitle</item>
         <item name="actionMenuTextColor">@color/textTitle</item>
@@ -204,6 +211,21 @@
 
     <style name="DebugText.Big">
         <item name="android:textSize">@dimen/text_size_big</item>
+    </style>
+
+    <style name="LibraryInfoLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingEnd">@dimen/margin_horizontal_default</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/library</item>
+        <item name="android:textSize">@dimen/text_size_list_item_text_small</item>
+    </style>
+
+    <style name="LibraryInfoValue">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/text_size_list_item_text</item>
     </style>
 
 </resources>

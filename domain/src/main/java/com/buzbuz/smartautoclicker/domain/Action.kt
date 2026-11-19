@@ -264,7 +264,7 @@ sealed class Action {
     ) : Action() {
 
         override fun isComplete(): Boolean =
-            super.isComplete() && !host.isNullOrBlank() && port != null && !command.isNullOrBlank()
+            super.isComplete() && !command.isNullOrBlank()
 
         override fun toEntity(): CompleteActionEntity {
             if (!isComplete()) throw IllegalStateException("Can't transform to entity, Adb is incomplete.")

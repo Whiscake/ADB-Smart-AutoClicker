@@ -135,15 +135,16 @@ abstract class EventDao {
     @Transaction
     open suspend fun addCompleteEvent(event: CompleteEventEntity): Long {
         val eventId = addEvent(event.event)
+        val actions = event.actions.sortedBy { it.action.priority }
 
-        event.actions.forEachIndexed { index, action ->
+        actions.forEachIndexed { index, action ->
             action.action.id = 0
             action.action.eventId = eventId
             action.action.priority = index
         }
-        val actionIds = addActions(event.actions.map { it.action })
+        val actionIds = addActions(actions.map { it.action })
 
-        event.actions.forEachIndexed { index, completeAction ->
+        actions.forEachIndexed { index, completeAction ->
             completeAction.intentExtras.forEach { intentExtra ->
                 intentExtra.actionId = actionIds[index]
             }

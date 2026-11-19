@@ -47,7 +47,11 @@ class ScenarioViewModel(application: Application) : AndroidViewModel(application
     /** Callback upon the availability of the [SmartAutoClickerService]. */
     private val serviceConnection: (SmartAutoClickerService.LocalService?) -> Unit = { localService ->
         clickerService = localService
+        _serviceAvailable.value = localService != null
     }
+
+    private val _serviceAvailable = MutableStateFlow(false)
+    val serviceAvailable: StateFlow<Boolean> = _serviceAvailable
 
     /**
      * Reference on the [SmartAutoClickerService].
@@ -74,6 +78,8 @@ class ScenarioViewModel(application: Application) : AndroidViewModel(application
                     selectAllVisibility = false,
                     createBackupVisibility = false,
                     createBackupEnabled = false,
+                    deleteVisibility = false,
+                    deleteEnabled = false,
                 )
                 MenuState.EXPORT -> MenuUiState(
                     state = menuState,
@@ -83,7 +89,20 @@ class ScenarioViewModel(application: Application) : AndroidViewModel(application
                     selectAllVisibility = true,
                     createBackupVisibility = true,
                     createBackupEnabled = selection.isNotEmpty(),
-                    createBackupAlpha = if (selection.isNotEmpty()) 255 else 127
+                    createBackupAlpha = if (selection.isNotEmpty()) 255 else 127,
+                    deleteVisibility = false,
+                    deleteEnabled = false,
+                )
+                MenuState.DELETE -> MenuUiState(
+                    state = menuState,
+                    searchVisibility = false,
+                    importBackupVisibility = false,
+                    cancelVisibility = true,
+                    selectAllVisibility = true,
+                    createBackupVisibility = false,
+                    createBackupEnabled = false,
+                    deleteVisibility = true,
+                    deleteEnabled = selection.isNotEmpty(),
                 )
                 MenuState.SELECTION -> MenuUiState(
                     state = menuState,
@@ -93,6 +112,8 @@ class ScenarioViewModel(application: Application) : AndroidViewModel(application
                     selectAllVisibility = false,
                     createBackupVisibility = true,
                     createBackupEnabled = true,
+                    deleteVisibility = true,
+                    deleteEnabled = true,
                 )
             }
         }
@@ -106,7 +127,7 @@ class ScenarioViewModel(application: Application) : AndroidViewModel(application
                 if (query.isNullOrEmpty() || scenario.name.contains(query.toString(), true)) {
                     ScenarioItem(
                         scenario = scenario,
-                        exportMode = menuState == MenuState.EXPORT,
+                        exportMode = menuState == MenuState.EXPORT || menuState == MenuState.DELETE,
                         checkedForExport = backupSelection.contains(scenario.id)
                     )
                 } else {
@@ -167,6 +188,12 @@ class ScenarioViewModel(application: Application) : AndroidViewModel(application
      * @param scenario the scenario to be renamed
      * @param name the new name of the scenario
      */
+    fun setScenarioScreen(scenario: Scenario, width: Int, height: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateScenario(scenario.copy(screenWidth = width, screenHeight = height))
+        }
+    }
+
     fun renameScenario(scenario: Scenario, name: String) {
         scenario.name = name
         viewModelScope.launch(Dispatchers.IO) {
@@ -181,6 +208,13 @@ class ScenarioViewModel(application: Application) : AndroidViewModel(application
      *
      * @param scenario the scenario to be deleted.
      */
+    fun deleteSelectedScenarios() {
+        val selection = selectedForBackup.value
+        val scenarios = scenarioList.value.map { it.scenario }.filter { it.id in selection }
+        setMenuState(MenuState.SELECTION)
+        viewModelScope.launch(Dispatchers.IO) { scenarios.forEach { repository.deleteScenario(it) } }
+    }
+
     fun deleteScenario(scenario: Scenario) {
         viewModelScope.launch(Dispatchers.IO) { repository.deleteScenario(scenario) }
     }
@@ -259,6 +293,7 @@ enum class MenuState {
     SEARCH,
     /** The user is selecting the scenarios to export. */
     EXPORT,
+    DELETE,
 }
 
 /**
@@ -282,6 +317,8 @@ data class MenuUiState(
     val createBackupVisibility: Boolean,
     val createBackupEnabled: Boolean,
     @IntRange(from = 0, to = 255) val createBackupAlpha: Int = 255,
+    val deleteVisibility: Boolean,
+    val deleteEnabled: Boolean,
 )
 
 /**

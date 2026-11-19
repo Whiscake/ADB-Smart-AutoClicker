@@ -19,6 +19,7 @@ package com.buzbuz.smartautoclicker.activity.backup
 import android.app.Application
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.Point
 import android.net.Uri
 import android.view.View
 
@@ -35,6 +36,7 @@ import com.buzbuz.smartautoclicker.domain.Backup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -86,10 +88,16 @@ class BackupViewModel(application: Application) : AndroidViewModel(application) 
      * @param isImport true for an import, false for an export.
      * @param scenarios the list of scenario to be exported. Ignored for an import.
      */
-    fun startBackup(uri: Uri, isImport: Boolean, scenarios: List<Long> = emptyList()) {
+    /**
+     * Starts the backup. An import given a [screen] sets it as the resolution of the imported scenarios that have
+     * none, which is how the library tells the resolution of configs exported before scenarios kept it.
+     */
+    fun startBackup(uri: Uri, isImport: Boolean, scenarios: List<Long> = emptyList(), screen: Point? = null) {
         viewModelScope.launch(Dispatchers.IO) {
             if (isImport) {
+                val existing = repository.scenarios.first().map { it.id }.toSet()
                 repository.restoreScenarioBackup(uri, screenMetrics.screenSize).collect { backup ->
+                    if (backup is Backup.Completed && screen != null) setMissingScreen(existing, screen)
                     updateBackupState(backup, true)
                 }
             } else {
@@ -105,6 +113,12 @@ class BackupViewModel(application: Application) : AndroidViewModel(application) 
      * @param backup the last backup results.
      * @param isImport true for an import, false for an export.
      */
+    private suspend fun setMissingScreen(existing: Set<Long>, screen: Point) {
+        repository.scenarios.first()
+            .filter { it.id !in existing && (it.screenWidth <= 0 || it.screenHeight <= 0) }
+            .forEach { repository.updateScenario(it.copy(screenWidth = screen.x, screenHeight = screen.y)) }
+    }
+
     private fun updateBackupState(backup: Backup?, isImport: Boolean) {
         _backupState.value = when (backup) {
             is Backup.Loading -> getLoadingState(backup, isImport)

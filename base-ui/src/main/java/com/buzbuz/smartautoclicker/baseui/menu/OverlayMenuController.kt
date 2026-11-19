@@ -34,6 +34,7 @@ import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.core.view.doOnLayout
 import androidx.core.view.forEach
 import com.buzbuz.smartautoclicker.baseui.OverlayController
 
@@ -200,6 +201,11 @@ abstract class OverlayMenuController(context: Context) : OverlayController(conte
             windowManager.addView(it, overlayLayoutParams)
         }
         windowManager.addView(menuLayout, menuLayoutParams)
+        menuLayout?.doOnLayout { view ->
+            if (menuLayout !== view) return@doOnLayout
+            loadMenuPosition(screenMetrics.orientation)
+            windowManager.updateViewLayout(view, menuLayoutParams)
+        }
         setMenuItemViewEnabled(R.id.btn_hide_overlay, false , true)
     }
 
@@ -319,8 +325,8 @@ abstract class OverlayMenuController(context: Context) : OverlayController(conte
      */
     private fun setMenuLayoutPosition(x: Int, y: Int) {
         val displaySize = screenMetrics.screenSize
-        menuLayoutParams.x = x.coerceIn(0, displaySize.x - menuLayout!!.width)
-        menuLayoutParams.y = y.coerceIn(0, displaySize.y - menuLayout!!.height)
+        menuLayoutParams.x = x.coerceIn(0, (displaySize.x - menuLayout!!.width).coerceAtLeast(0))
+        menuLayoutParams.y = y.coerceIn(0, (displaySize.y - menuLayout!!.height).coerceAtLeast(0))
     }
 
     /**
@@ -347,19 +353,19 @@ abstract class OverlayMenuController(context: Context) : OverlayController(conte
     }
 
     /**
-     * Load last user menu position for the current orientation, if any.
+     * Load last user menu position for the current orientation, or the top right corner if there is none.
      *
      * @param orientation the orientation to load the position for.
      */
     private fun loadMenuPosition(orientation: Int) {
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setMenuLayoutPosition(
-                sharedPreferences.getInt(PREFERENCE_MENU_X_LANDSCAPE_KEY, 0),
+                sharedPreferences.getInt(PREFERENCE_MENU_X_LANDSCAPE_KEY, Int.MAX_VALUE),
                 sharedPreferences.getInt(PREFERENCE_MENU_Y_LANDSCAPE_KEY, 0)
             )
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             setMenuLayoutPosition(
-                sharedPreferences.getInt(PREFERENCE_MENU_X_PORTRAIT_KEY, 0),
+                sharedPreferences.getInt(PREFERENCE_MENU_X_PORTRAIT_KEY, Int.MAX_VALUE),
                 sharedPreferences.getInt(PREFERENCE_MENU_Y_PORTRAIT_KEY, 0)
             )
         }

@@ -59,8 +59,13 @@ internal class BitmapManagerImpl(private val appDataDir: File) : BitmapManager {
         bitmap.copyPixelsToBuffer(uncompressedBuffer)
         uncompressedBuffer.position(0)
 
-        val path = "$CLICK_CONDITION_FILE_PREFIX${uncompressedBuffer.hashCode()}"
-        val file = File(appDataDir, path)
+        var id = uncompressedBuffer.hashCode()
+        var file = File(appDataDir, "$CLICK_CONDITION_FILE_PREFIX$id")
+        while (withContext(Dispatchers.IO) { file.exists() && !file.holds(uncompressedBuffer) }) {
+            id++
+            file = File(appDataDir, "$CLICK_CONDITION_FILE_PREFIX$id")
+        }
+        val path = file.name
         if (!file.exists()) {
             Log.d(TAG, "Saving $path")
 
@@ -95,6 +100,10 @@ internal class BitmapManagerImpl(private val appDataDir: File) : BitmapManager {
                 val buffer = ByteBuffer.allocateDirect(it.channel.size().toInt())
                 it.channel.read(buffer)
                 buffer.position(0)
+                if (width <= 0 || height <= 0 || buffer.capacity() < width * height * 4) {
+                    Log.e(TAG, "Bitmap $path doesn't match its ${width}x$height area.")
+                    return@withContext null
+                }
 
                 cachedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                 cachedBitmap.copyPixelsFromBuffer(buffer)
@@ -109,13 +118,17 @@ internal class BitmapManagerImpl(private val appDataDir: File) : BitmapManager {
         for (path in paths) {
             val file = File(appDataDir, path)
             if (!file.exists()) {
-                return
+                continue
             }
 
             Log.d(TAG, "Deleting $path")
             file.delete()
         }
     }
+
+    /** Two different images can share a hash: a file only stands for this bitmap if its bytes are the same. */
+    private fun File.holds(buffer: ByteBuffer): Boolean =
+        length() == buffer.remaining().toLong() && ByteBuffer.wrap(readBytes()) == buffer.duplicate()
 
     override fun releaseCache() {
         memoryCache.evictAll()

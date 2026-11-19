@@ -31,16 +31,14 @@ import com.buzbuz.smartautoclicker.databinding.ItemScenarioBinding
 /**
  * Adapter for the display of the click scenarios created by the user into a RecyclerView.
  *
- * @param startScenarioListener listener upon the click on a scenario.
+ * @param startScenarioListener listener upon the click on a scenario, outside of the export and delete selection.
  * @param editClickListener listener upon the rename button of a scenario.
  * @param exportClickListener listener upon the export button of a scenario.
- * @param deleteScenarioListener listener upon the delete button of a scenario.
  */
 class ScenarioAdapter(
     private val startScenarioListener: ((Scenario) -> Unit),
     private val editClickListener: ((Scenario) -> Unit),
     private val exportClickListener: ((Scenario) -> Unit),
-    private val deleteScenarioListener: ((Scenario) -> Unit),
 ) : ListAdapter<ScenarioItem, ScenarioViewHolder>(ScenarioDiffUtilCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScenarioViewHolder =
@@ -49,7 +47,6 @@ class ScenarioAdapter(
             startScenarioListener,
             editClickListener,
             exportClickListener,
-            deleteScenarioListener,
         )
 
     override fun onBindViewHolder(holder: ScenarioViewHolder, position: Int) {
@@ -71,32 +68,38 @@ class ScenarioViewHolder(
     private val startScenarioListener: ((Scenario) -> Unit),
     private val editClickListener: ((Scenario) -> Unit),
     private val exportClickListener: ((Scenario) -> Unit),
-    private val deleteScenarioListener: ((Scenario) -> Unit),
 ) : RecyclerView.ViewHolder(viewBinding.root) {
 
     fun onBind(scenarioItem: ScenarioItem) = viewBinding.apply {
         name.text = scenarioItem.scenario.name
-        details.text = itemView.context.resources.getQuantityString(
-            R.plurals.scenario_sub_text,
-            scenarioItem.scenario.eventCount,
-            scenarioItem.scenario.eventCount,
+        val context = itemView.context
+        val scenario = scenarioItem.scenario
+        val events = context.resources.getQuantityString(
+            R.plurals.scenario_sub_text, scenario.eventCount, scenario.eventCount,
         )
+        details.text = if (scenario.screenWidth > 0 && scenario.screenHeight > 0) {
+            val width = minOf(scenario.screenWidth, scenario.screenHeight)
+            val height = maxOf(scenario.screenWidth, scenario.screenHeight)
+            context.getString(R.string.scenario_sub_text_screen, events, "${width}x$height")
+        } else {
+            events
+        }
 
         if (scenarioItem.exportMode) {
-            btnDelete.visibility = View.GONE
             btnRename.visibility = View.GONE
             btnExport.apply {
                 visibility = View.VISIBLE
                 isChecked = scenarioItem.checkedForExport
             }
         } else {
-            btnDelete.visibility = View.VISIBLE
             btnRename.visibility = View.VISIBLE
             btnExport.visibility = View.GONE
         }
 
-        root.setOnClickListener { startScenarioListener(scenarioItem.scenario) }
-        btnDelete.setOnClickListener { deleteScenarioListener(scenarioItem.scenario) }
+        root.setOnClickListener {
+            if (scenarioItem.exportMode) exportClickListener(scenarioItem.scenario)
+            else startScenarioListener(scenarioItem.scenario)
+        }
         btnRename.setOnClickListener { editClickListener(scenarioItem.scenario) }
         btnExport.setOnClickListener { exportClickListener(scenarioItem.scenario) }
     }

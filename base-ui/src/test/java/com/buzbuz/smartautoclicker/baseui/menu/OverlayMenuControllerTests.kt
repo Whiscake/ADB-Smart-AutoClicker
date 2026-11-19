@@ -179,7 +179,7 @@ class OverlayMenuControllerTests {
             yKey = OverlayMenuController.PREFERENCE_MENU_Y_PORTRAIT_KEY
         }
 
-        mockWhen(mockSharedPrefs.getInt(ArgumentMatchers.eq(xKey), ArgumentMatchers.eq(0))).thenReturn(x)
+        mockWhen(mockSharedPrefs.getInt(ArgumentMatchers.eq(xKey), ArgumentMatchers.eq(Int.MAX_VALUE))).thenReturn(x)
         mockWhen(mockSharedPrefs.getInt(ArgumentMatchers.eq(yKey), ArgumentMatchers.eq(0))).thenReturn(y)
     }
 

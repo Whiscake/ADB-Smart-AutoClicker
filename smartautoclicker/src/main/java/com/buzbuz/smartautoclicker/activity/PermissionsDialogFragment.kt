@@ -28,10 +28,15 @@ import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 
 import com.buzbuz.smartautoclicker.R
 import com.buzbuz.smartautoclicker.baseui.dialog.setCustomTitle
 import com.buzbuz.smartautoclicker.SmartAutoClickerService
+
+import kotlinx.coroutines.launch
 
 /**
  * Displays the state of the permission and provide a way to access their respective settings.
@@ -100,10 +105,19 @@ class PermissionsDialogFragment : DialogFragment() {
             accessibilityView = it.findViewById(R.id.item_accessibility_permission)
             accessibilityView.setOnClickListener { onAccessibilityClicked() }
         }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                scenarioViewModel.serviceAvailable.collect { refreshPermissionsState() }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        refreshPermissionsState()
+    }
+
+    private fun refreshPermissionsState() {
         setConfigStateDrawable(overlayStateView, scenarioViewModel.isOverlayPermissionValid())
         setConfigStateDrawable(accessibilityStateView, scenarioViewModel.isAccessibilityPermissionValid())
         (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE).isEnabled =

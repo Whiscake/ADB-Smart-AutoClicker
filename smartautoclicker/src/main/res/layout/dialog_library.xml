@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2026 Whiscake
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http://www.gnu.org/licenses/>.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/item_height"
+        android:layout_marginStart="@dimen/margin_horizontal_default"
+        android:layout_marginEnd="@dimen/margin_horizontal_default"
+        android:layout_marginTop="@dimen/margin_vertical_default"
+        android:drawableStart="@drawable/abc_ic_search_api_material"
+        android:drawablePadding="@dimen/margin_horizontal_small"
+        android:hint="@string/dialog_library_search"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:importantForAutofill="no"/>
+
+    <LinearLayout
+        android:id="@+id/filters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/margin_horizontal_default"
+        android:paddingEnd="@dimen/margin_horizontal_default"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/item_height"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="@dimen/library_filter_label_width"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="@string/dialog_library_resolution"/>
+
+            <Spinner
+                android:id="@+id/filter_resolution"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/item_height"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="@dimen/library_filter_label_width"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="@string/dialog_library_author"/>
+
+            <Spinner
+                android:id="@+id/filter_author"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_vertical_small"
+            android:textStyle="bold"
+            android:text="@string/dialog_library_tags"/>
+
+        <GridLayout
+            android:id="@+id/filter_tags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"/>
+
+        <Button
+            android:id="@+id/btn_clear_filters"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="@string/dialog_library_clear_filters"/>
+    </LinearLayout>
+
+    <View
+        style="@style/Separator"
+        android:layout_marginTop="@dimen/margin_vertical_small"/>
+
+    <FrameLayout
+        android:id="@+id/layout_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/empty_min_height">
+
+        <include layout="@layout/merge_loadable_list"/>
+    </FrameLayout>
+
+</LinearLayout>

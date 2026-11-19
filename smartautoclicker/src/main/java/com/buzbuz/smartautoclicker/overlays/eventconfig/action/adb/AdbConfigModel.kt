@@ -42,8 +42,7 @@ class AdbConfigModel(
 
     override val isValidAction: Flow<Boolean> = configuredAction
         .map { action ->
-            action is Action.Adb && !action.name.isNullOrEmpty() && !action.host.isNullOrBlank()
-                    && action.port != null && !action.command.isNullOrBlank()
+            action is Action.Adb && !action.name.isNullOrEmpty() && !action.command.isNullOrBlank()
         }
 
     override fun saveLastConfig(eventConfigPrefs: SharedPreferences) = Unit

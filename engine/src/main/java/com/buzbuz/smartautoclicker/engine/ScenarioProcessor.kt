@@ -55,10 +55,12 @@ internal class ScenarioProcessor(
     endConditions: List<EndCondition>,
     onEndConditionReached: () -> Unit,
     private val debugEngine: DebugEngine? = null,
+    isAdbEnabled: () -> Boolean = { true },
+    bridge: () -> Bridge = { Bridge(DEFAULT_BRIDGE_HOST, DEFAULT_BRIDGE_PORT, "") },
 ) {
 
     /** Execute the detected event actions. */
-    private val actionExecutor = ActionExecutor(androidExecutor)
+    private val actionExecutor = ActionExecutor(androidExecutor, isAdbEnabled, bridge)
     /** Verifies the end conditions of a scenario. */
     private val endConditionVerifier = EndConditionVerifier(endConditions, endConditionOperator, onEndConditionReached)
 
@@ -179,6 +181,7 @@ internal class ScenarioProcessor(
     private fun checkCondition(condition: Condition) : DetectionResult? {
         condition.path?.let { path ->
             bitmapSupplier(path, condition.area.width(), condition.area.height())?.let { conditionBitmap ->
+                if (condition.detectionType == WHOLE_SCREEN && !conditionBitmap.fitsIn(processedScreenBitmap)) return null
                 return detect(condition, conditionBitmap)
             }
         }
@@ -201,6 +204,10 @@ internal class ScenarioProcessor(
             else -> throw IllegalArgumentException("Unexpected detection type")
         }
 }
+
+/** True if this condition image is not bigger than the [screen], as the detection can't search for it otherwise. */
+private fun Bitmap.fitsIn(screen: Bitmap?): Boolean =
+    screen != null && width <= screen.width && height <= screen.height
 
 /**
  * Send a new detection result to the debug engine, if any.

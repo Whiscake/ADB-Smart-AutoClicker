@@ -28,7 +28,11 @@ import com.buzbuz.smartautoclicker.domain.Action.Pause
 import com.buzbuz.smartautoclicker.domain.Action.Swipe
 import com.buzbuz.smartautoclicker.domain.putExtra
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
@@ -41,7 +45,13 @@ import java.net.URLEncoder
  *
  * @param androidExecutor the executor for the actions requiring an interaction with Android.
  */
-internal class ActionExecutor(private val androidExecutor: AndroidExecutor) {
+internal class ActionExecutor(
+    private val androidExecutor: AndroidExecutor,
+    private val isAdbEnabled: () -> Boolean = { true },
+    private val bridge: () -> Bridge = { Bridge(DEFAULT_BRIDGE_HOST, DEFAULT_BRIDGE_PORT, "") },
+) {
+
+    private val adbScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
      * Execute the provided actions.
@@ -50,12 +60,18 @@ internal class ActionExecutor(private val androidExecutor: AndroidExecutor) {
      */
     suspend fun executeActions(actions: List<Action>, conditionPosition: Point?) {
         actions.forEach { action ->
-            when (action) {
-                is Click -> executeClick(action, conditionPosition)
-                is Swipe -> executeSwipe(action)
-                is Pause -> executePause(action)
-                is Action.Intent -> executeIntent(action)
-                is Action.Adb -> executeAdb(action)
+            try {
+                when (action) {
+                    is Click -> executeClick(action, conditionPosition)
+                    is Swipe -> executeSwipe(action)
+                    is Pause -> executePause(action)
+                    is Action.Intent -> executeIntent(action)
+                    is Action.Adb -> if (isAdbEnabled()) executeAdb(action)
+                }
+            } catch (ex: CancellationException) {
+                throw ex
+            } catch (ex: Exception) {
+                Log.w(TAG, "Can't execute the ${action::class.simpleName} action, skipping it", ex)
             }
         }
     }
@@ -147,31 +163,36 @@ internal class ActionExecutor(private val androidExecutor: AndroidExecutor) {
      * @param adb the adb command to be sent.
      */
     private suspend fun executeAdb(adb: Action.Adb) {
-        withContext(Dispatchers.IO) {
-            var connection: HttpURLConnection? = null
-            try {
-                connection = (URL("http", adb.host!!, adb.port!!, "/adb").openConnection() as HttpURLConnection).apply {
-                    requestMethod = "POST"
-                    doOutput = true
-                    connectTimeout = ADB_CONNECT_TIMEOUT
-                    readTimeout = ADB_READ_TIMEOUT
-                    setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-                    adb.token?.let { setRequestProperty("X-Adb-Bridge-Token", it) }
-                }
-                val body = "command=" + URLEncoder.encode(adb.command!!, "UTF-8")
-                connection.outputStream.use { it.write(body.toByteArray()) }
+        adbScope.async { sendAdb(adb) }.await()
+    }
 
-                val response = (if (connection.responseCode < 400) connection.inputStream else connection.errorStream)
-                    ?.bufferedReader()?.use { it.readText() }
-                if (connection.responseCode >= 400) {
-                    Log.w(TAG, "Adb bridge rejected the command (${connection.responseCode}): $response")
-                }
-            } catch (ex: Exception) {
-                Log.w(TAG, "Can't send adb command to ${adb.host}:${adb.port}", ex)
-            } finally {
-                connection?.disconnect()
+    private fun sendAdb(adb: Action.Adb) {
+        val bridge = bridge()
+        val host = adb.host?.takeIf { it.isNotBlank() } ?: bridge.host
+        val port = adb.port?.takeIf { it > 0 } ?: bridge.port
+        val token = adb.token?.takeIf { it.isNotBlank() } ?: bridge.token.takeIf { it.isNotBlank() }
+        var connection: HttpURLConnection? = null
+        try {
+            connection = (URL("http", host, port, "/adb").openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                doOutput = true
+                connectTimeout = ADB_CONNECT_TIMEOUT
+                readTimeout = ADB_READ_TIMEOUT
+                setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                token?.let { setRequestProperty("X-Adb-Bridge-Token", it) }
             }
-            Unit
+            val body = "command=" + URLEncoder.encode(adb.command!!, "UTF-8")
+            connection.outputStream.use { it.write(body.toByteArray()) }
+
+            val response = (if (connection.responseCode < 400) connection.inputStream else connection.errorStream)
+                ?.bufferedReader()?.use { it.readText() }
+            if (connection.responseCode >= 400) {
+                Log.w(TAG, "Adb bridge rejected the command (${connection.responseCode}): $response")
+            }
+        } catch (ex: Exception) {
+            Log.w(TAG, "Can't send adb command to $host:$port", ex)
+        } finally {
+            connection?.disconnect()
         }
     }
 }

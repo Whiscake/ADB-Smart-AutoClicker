@@ -37,9 +37,11 @@ data class Scenario(
     var detectionQuality: Int,
     @ConditionOperator var endConditionOperator: Int,
     val eventCount: Int = 0,
+    val screenWidth: Int = 0,
+    val screenHeight: Int = 0,
 ) {
     /** @return the entity equivalent of this scenario. */
-    internal fun toEntity() = ScenarioEntity(id, name, detectionQuality, endConditionOperator)
+    internal fun toEntity() = ScenarioEntity(id, name, detectionQuality, endConditionOperator, screenWidth, screenHeight)
 }
 
 /** @return the scenario for this entity. */
@@ -48,6 +50,8 @@ internal fun ScenarioEntity.toScenario() = Scenario(
     name = name,
     detectionQuality = detectionQuality,
     endConditionOperator = endConditionOperator,
+    screenWidth = screenWidth,
+    screenHeight = screenHeight,
 )
 
 /** @return the scenario for this entity. */
@@ -56,5 +60,7 @@ internal fun ScenarioWithEvents.toScenario() = Scenario(
     name = scenario.name,
     detectionQuality = scenario.detectionQuality,
     endConditionOperator = scenario.endConditionOperator,
-    eventCount = events.size
+    eventCount = events.size,
+    screenWidth = scenario.screenWidth,
+    screenHeight = scenario.screenHeight,
 )
