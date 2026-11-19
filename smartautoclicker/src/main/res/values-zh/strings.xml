@@ -227,6 +227,7 @@
     <string name="dialog_library_empty">配置库中还没有配置。</string>
     <string name="dialog_library_error">无法连接配置库：%1$s</string>
     <string name="dialog_settings_library_title">配置库地址</string>
+    <string name="dialog_settings_notifications">通知：新版本、配置库变化和更新后的更新内容</string>
     <string name="dialog_library_search">搜索名称、作者、标签…</string>
     <string name="dialog_library_filters">筛选</string>
     <string name="dialog_library_clear_filters">清除筛选</string>

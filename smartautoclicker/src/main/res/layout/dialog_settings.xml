@@ -76,4 +76,12 @@
         android:hint="@string/dialog_settings_library_title"
         android:importantForAutofill="no" />
 
+    <CheckBox
+        android:id="@+id/check_notifications"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_vertical_small"
+        android:layout_marginBottom="@dimen/margin_vertical_default"
+        android:text="@string/dialog_settings_notifications" />
+
 </LinearLayout>

@@ -199,6 +199,7 @@
     <string name="dialog_library_empty">Aucune configuration dans la bibliothèque.</string>
     <string name="dialog_library_error">Bibliothèque injoignable : %1$s</string>
     <string name="dialog_settings_library_title">Adresse de la bibliothèque</string>
+    <string name="dialog_settings_notifications">Notifications : nouvelle version, changements de la bibliothèque et nouveautés après une mise à jour</string>
     <string name="dialog_library_search">Rechercher nom, auteur, tag…</string>
     <string name="dialog_library_filters">Filtres</string>
     <string name="dialog_library_clear_filters">Effacer les filtres</string>

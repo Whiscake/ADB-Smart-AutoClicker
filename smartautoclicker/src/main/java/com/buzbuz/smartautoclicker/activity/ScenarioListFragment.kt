@@ -58,6 +58,7 @@ import com.buzbuz.smartautoclicker.activity.news.NewsDialogFragment
 import com.buzbuz.smartautoclicker.activity.news.NewsDialogFragment.Companion.FRAGMENT_TAG_NEWS_DIALOG
 import com.buzbuz.smartautoclicker.activity.news.RemoteStatus
 import com.buzbuz.smartautoclicker.activity.news.Tutorial
+import com.buzbuz.smartautoclicker.activity.news.areNotificationsEnabled
 import com.buzbuz.smartautoclicker.activity.news.consumeNewVersion
 import com.buzbuz.smartautoclicker.activity.news.consumeReleaseNotice
 import com.buzbuz.smartautoclicker.activity.news.isFreshInstall
@@ -201,8 +202,16 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
     private fun showNewsOnUpdate() {
         val context = requireContext()
         if (context.consumeNewVersion()) {
-            if (context.isFreshInstall()) (activity as? AppCompatActivity)?.let(Tutorial::start) else showNews()
+            when {
+                context.isFreshInstall() -> (activity as? AppCompatActivity)?.let(Tutorial::start)
+                context.areNotificationsEnabled() -> showNews()
+            }
         }
+        checkRemote()
+    }
+
+    private fun checkRemote() {
+        val context = requireContext()
         viewLifecycleOwner.lifecycleScope.launch {
             RemoteStatus.check(context)
             RemoteStatus.release.value?.let { if (context.consumeReleaseNotice(it)) showNews() }
@@ -343,6 +352,7 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
         binding.editBridgePort.setText(bridge.port.toString())
         binding.editBridgeToken.setText(bridge.token)
         binding.editLibraryUrl.setText(context.libraryUrl())
+        binding.checkNotifications.isChecked = context.areNotificationsEnabled()
         showDialog(AlertDialog.Builder(context)
             .setCustomTitle(R.layout.view_dialog_title, R.string.dialog_settings_title)
             .setView(binding.root)
@@ -356,6 +366,8 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
                     )
                 )
                 context.setLibraryUrl(binding.editLibraryUrl.text.toString())
+                RemoteStatus.setNotificationsEnabled(context, binding.checkNotifications.isChecked)
+                if (binding.checkNotifications.isChecked) checkRemote()
             }
             .setNegativeButton(android.R.string.cancel, null)
             .create())

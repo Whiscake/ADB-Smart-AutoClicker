@@ -49,6 +49,7 @@ object RemoteStatus {
     val release: StateFlow<AppRelease?> = _release
 
     suspend fun check(context: Context) = withContext(Dispatchers.IO) {
+        if (!context.areNotificationsEnabled()) return@withContext
         val index = context.libraryUrl()
         try {
             val text = URL(index).fetchText()
@@ -67,6 +68,14 @@ object RemoteStatus {
         }
     }
 
+    fun setNotificationsEnabled(context: Context, enabled: Boolean) {
+        context.prefs().edit().putBoolean(KEY_NOTIFICATIONS, enabled).apply()
+        if (!enabled) {
+            _libraryChanged.value = false
+            _release.value = null
+        }
+    }
+
     fun onLibrarySeen(context: Context, index: String) {
         context.prefs().edit().putString(KEY_LIBRARY_SEEN, index.fingerprint()).apply()
         _libraryChanged.value = false
@@ -74,6 +83,9 @@ object RemoteStatus {
 }
 
 fun Context.librarySeen(index: String) = RemoteStatus.onLibrarySeen(this, index)
+
+/** False when the user turned off the red badges, the new version notice and the news after an update. */
+fun Context.areNotificationsEnabled(): Boolean = prefs().getBoolean(KEY_NOTIFICATIONS, true)
 
 /** True once for each new version of the app, the first time its config list opens. */
 fun Context.consumeNewVersion(): Boolean {
@@ -104,5 +116,6 @@ private const val PREFERENCES_NAME = "News"
 private const val KEY_LIBRARY_SEEN = "Library_Seen"
 private const val KEY_NEWS_SHOWN = "News_Shown"
 private const val KEY_RELEASE_NOTIFIED = "Release_Notified"
+private const val KEY_NOTIFICATIONS = "Notifications"
 private const val APP_FILE = "app.json"
 private const val TAG = "RemoteStatus"
