@@ -51,6 +51,12 @@
         android:title="@string/menu_delete_item_title" />
 
     <item
+        android:id="@+id/action_news"
+        android:icon="@drawable/ic_info"
+        app:showAsAction="always"
+        android:title="@string/menu_news_item_title" />
+
+    <item
         android:id="@+id/action_library"
         android:icon="@drawable/ic_library"
         app:showAsAction="always"

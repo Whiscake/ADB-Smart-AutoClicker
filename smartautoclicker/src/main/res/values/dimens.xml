@@ -65,4 +65,5 @@
     <dimen name="overlay_debug_panel_width">200dp</dimen>
 
     <dimen name="library_filter_label_width">96dp</dimen>
+    <dimen name="tutorial_card_margin">56dp</dimen>
 </resources>

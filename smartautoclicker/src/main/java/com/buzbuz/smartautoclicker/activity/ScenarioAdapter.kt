@@ -31,7 +31,7 @@ import com.buzbuz.smartautoclicker.databinding.ItemScenarioBinding
 /**
  * Adapter for the display of the click scenarios created by the user into a RecyclerView.
  *
- * @param startScenarioListener listener upon the click on a scenario.
+ * @param startScenarioListener listener upon the click on a scenario, outside of the export and delete selection.
  * @param editClickListener listener upon the rename button of a scenario.
  * @param exportClickListener listener upon the export button of a scenario.
  */
@@ -96,7 +96,10 @@ class ScenarioViewHolder(
             btnExport.visibility = View.GONE
         }
 
-        root.setOnClickListener { startScenarioListener(scenarioItem.scenario) }
+        root.setOnClickListener {
+            if (scenarioItem.exportMode) exportClickListener(scenarioItem.scenario)
+            else startScenarioListener(scenarioItem.scenario)
+        }
         btnRename.setOnClickListener { editClickListener(scenarioItem.scenario) }
         btnExport.setOnClickListener { exportClickListener(scenarioItem.scenario) }
     }

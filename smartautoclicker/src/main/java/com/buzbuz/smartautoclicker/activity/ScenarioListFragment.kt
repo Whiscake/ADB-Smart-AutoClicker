@@ -18,6 +18,7 @@ package com.buzbuz.smartautoclicker.activity
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.media.projection.MediaProjectionManager
 import android.os.Bundle
 import android.util.Log
@@ -52,6 +53,14 @@ import com.buzbuz.smartautoclicker.activity.library.LibraryDialogFragment
 import com.buzbuz.smartautoclicker.activity.library.LibraryDialogFragment.Companion.FRAGMENT_TAG_LIBRARY_DIALOG
 import com.buzbuz.smartautoclicker.activity.library.libraryUrl
 import com.buzbuz.smartautoclicker.activity.library.setLibraryUrl
+import com.buzbuz.smartautoclicker.activity.news.BadgeDrawable
+import com.buzbuz.smartautoclicker.activity.news.NewsDialogFragment
+import com.buzbuz.smartautoclicker.activity.news.NewsDialogFragment.Companion.FRAGMENT_TAG_NEWS_DIALOG
+import com.buzbuz.smartautoclicker.activity.news.RemoteStatus
+import com.buzbuz.smartautoclicker.activity.news.Tutorial
+import com.buzbuz.smartautoclicker.activity.news.consumeNewVersion
+import com.buzbuz.smartautoclicker.activity.news.consumeReleaseNotice
+import com.buzbuz.smartautoclicker.activity.news.isFreshInstall
 import com.buzbuz.smartautoclicker.baseui.dialog.setCustomTitle
 import com.buzbuz.smartautoclicker.domain.Scenario
 import com.buzbuz.smartautoclicker.engine.Bridge
@@ -66,6 +75,7 @@ import com.buzbuz.smartautoclicker.databinding.DialogSettingsBinding
 import com.buzbuz.smartautoclicker.databinding.FragmentScenariosBinding
 import com.buzbuz.smartautoclicker.databinding.MergeLoadableListBinding
 
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
@@ -151,6 +161,18 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
                 }
             }
         }
+
+        val newsIcon = menu.findItem(R.id.action_news).icon
+        val libraryIcon = menu.findItem(R.id.action_library).icon
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                RemoteStatus.release.combine(RemoteStatus.libraryChanged) { release, changed -> (release != null) to changed }
+                    .collect { (newVersion, libraryChanged) ->
+                        menu.findItem(R.id.action_news).icon = newsIcon?.withBadge(newVersion)
+                        menu.findItem(R.id.action_library).icon = libraryIcon?.withBadge(libraryChanged)
+                    }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -171,6 +193,27 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
                 }
             }
         }
+
+        if (savedInstanceState == null) showNewsOnUpdate()
+    }
+
+    /** Opens the tutorial after the first install and the news after an update, then checks the library repository. */
+    private fun showNewsOnUpdate() {
+        val context = requireContext()
+        if (context.consumeNewVersion()) {
+            if (context.isFreshInstall()) (activity as? AppCompatActivity)?.let(Tutorial::start) else showNews()
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            RemoteStatus.check(context)
+            RemoteStatus.release.value?.let { if (context.consumeReleaseNotice(it)) showNews() }
+        }
+    }
+
+    private fun showNews() {
+        val manager = activity?.supportFragmentManager ?: return
+        if (manager.findFragmentByTag(FRAGMENT_TAG_NEWS_DIALOG) == null) {
+            NewsDialogFragment().show(manager, FRAGMENT_TAG_NEWS_DIALOG)
+        }
     }
 
     override fun onPermissionsGranted() {
@@ -186,6 +229,7 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
                     scenarioViewModel.setMenuState(MenuState.EXPORT)
                 }
             R.id.action_import -> showBackupDialog(true)
+            R.id.action_news -> showNews()
             R.id.action_library -> activity?.let {
                 LibraryDialogFragment().show(it.supportFragmentManager, FRAGMENT_TAG_LIBRARY_DIALOG)
             }
@@ -213,6 +257,7 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
         menu.apply {
             findItem(R.id.action_search).isVisible = menuState.searchVisibility
             findItem(R.id.action_import).isVisible = menuState.importBackupVisibility
+            findItem(R.id.action_news).isVisible = menuState.importBackupVisibility
             findItem(R.id.action_library).isVisible = menuState.importBackupVisibility
             findItem(R.id.action_settings).isVisible = menuState.importBackupVisibility
             findItem(R.id.action_cancel).isVisible = menuState.cancelVisibility
@@ -450,3 +495,9 @@ private val SCENARIO_SCREENS = listOf(720 to 1280, 900 to 1600, 1080 to 1920)
 
 private fun showAsAction(inToolbar: Boolean): Int =
     if (inToolbar) MenuItem.SHOW_AS_ACTION_ALWAYS else MenuItem.SHOW_AS_ACTION_NEVER
+
+private fun Drawable.withBadge(badge: Boolean): Drawable = when {
+    badge && this !is BadgeDrawable -> BadgeDrawable(this)
+    !badge && this is BadgeDrawable -> icon
+    else -> this
+}

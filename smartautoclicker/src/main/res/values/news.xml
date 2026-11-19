@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright (C) 2026 Whiscake
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; If not, see <http://www.gnu.org/licenses/>.
+-->
+<resources>
+
+    <string-array name="news_features" translatable="false">
+        <item>Library: ready-made configs to download, with an info page, colored tags, search and filters by resolution, author and tags</item>
+        <item>A red ! on the Library button when the library changes, and on the i button when a new version of the clicker is out</item>
+        <item>News page and a tutorial of the config list, from the i button</item>
+        <item>Settings: the ADB bridge used by ADB actions with empty fields, a switch for ADB actions and the library address</item>
+        <item>Each config shows the resolution it was made for, set from the pencil with Resolution</item>
+        <item>Export and delete several configs at once</item>
+        <item>Dual can resume the last config, export, import and set the bridge without opening the app</item>
+        <item>Play and stop in the floating menu act on the first touch</item>
+    </string-array>
+
+    <string-array name="news_fixes" translatable="false">
+        <item>Tapping a config while selecting configs to export or delete selects it instead of starting it</item>
+        <item>Two condition images with the same hash no longer replace each other when saving or importing</item>
+        <item>A config downloaded from the Library takes the resolution written in the library; other imports no longer guess it</item>
+    </string-array>
+
+    <string-array name="news_balance" translatable="false">
+        <item>Detection waits 10 ms when there is no new screen image instead of spinning, using less CPU</item>
+        <item>After an error, detection waits half a second before the next image</item>
+    </string-array>
+
+    <string-array name="news_debug" translatable="false">
+        <item>An action that fails is skipped and logged, the config keeps running</item>
+        <item>An image that fails is logged and detection goes on with the next one</item>
+        <item>A whole-screen condition bigger than the screen is skipped instead of closing the app</item>
+        <item>A damaged condition image is ignored instead of closing the app</item>
+        <item>Export and import requests from Dual always answer, even when they fail</item>
+    </string-array>
+
+</resources>

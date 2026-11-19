@@ -24,6 +24,7 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 
+import com.buzbuz.smartautoclicker.activity.news.librarySeen
 import com.buzbuz.smartautoclicker.baseui.ScreenMetrics
 
 import kotlinx.coroutines.Dispatchers
@@ -93,7 +94,9 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _state.value = try {
                 val index = application().libraryUrl()
-                val configs = withContext(Dispatchers.IO) { parseIndex(index, URL(index).readText()) }
+                val configs = withContext(Dispatchers.IO) {
+                    URL(index).fetchText().let { text -> parseIndex(index, text).also { application().librarySeen(text) } }
+                }
                 LibraryState.Loaded(configs.sortedWith(compareBy({ it.screen != screen }, { it.name.lowercase() })))
             } catch (ex: Exception) {
                 LibraryState.Error(ex.message ?: ex.javaClass.simpleName)
@@ -146,15 +149,15 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
 private fun JSONArray?.strings(): List<String> =
     if (this == null) emptyList() else (0 until length()).mapNotNull { optString(it).trim().ifEmpty { null } }
 
-private fun URL.connect(): HttpURLConnection = (openConnection() as HttpURLConnection).apply {
+internal fun URL.connect(): HttpURLConnection = (openConnection() as HttpURLConnection).apply {
     connectTimeout = TIMEOUT_MS
     readTimeout = TIMEOUT_MS
     if (responseCode != HttpURLConnection.HTTP_OK) throw IllegalStateException("HTTP $responseCode")
 }
 
-private fun URL.readText(): String = connect().inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+internal fun URL.fetchText(): String = connect().inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
 
-private fun URL.download(target: File) = connect().inputStream.use { input ->
+internal fun URL.download(target: File) = connect().inputStream.use { input ->
     target.outputStream().use { input.copyTo(it) }
 }
 
