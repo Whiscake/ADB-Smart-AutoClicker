@@ -135,7 +135,7 @@ fun Context.setLibraryUrl(url: String) = getSharedPreferences(PREFERENCES_NAME, 
 }.apply()
 
 const val DEFAULT_LIBRARY_URL =
-    "https://raw.githubusercontent.com/Whiscake/ADB-Smart-AutoClicker/adb-ykwp/library/index.json"
+    "https://raw.githubusercontent.com/barone138/ykwp-clicker-library/main/index.json"
 
 private const val PREFERENCES_NAME = "Library"
 private const val KEY_URL = "Index_Url"

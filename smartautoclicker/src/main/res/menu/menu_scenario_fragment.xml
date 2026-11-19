@@ -33,12 +33,6 @@
         android:visible="false"/>
 
     <item
-        android:id="@+id/action_library"
-        android:icon="@drawable/ic_load"
-        app:showAsAction="never"
-        android:title="@string/menu_library_item_title" />
-
-    <item
         android:id="@+id/action_import"
         android:icon="@drawable/ic_load"
         app:showAsAction="never"
@@ -55,6 +49,12 @@
         android:icon="@drawable/ic_delete"
         app:showAsAction="never"
         android:title="@string/menu_delete_item_title" />
+
+    <item
+        android:id="@+id/action_library"
+        android:icon="@drawable/ic_library"
+        app:showAsAction="always"
+        android:title="@string/menu_library_item_title" />
 
     <item
         android:id="@+id/action_settings"
