@@ -28,6 +28,7 @@ import com.buzbuz.smartautoclicker.domain.Action.Pause
 import com.buzbuz.smartautoclicker.domain.Action.Swipe
 import com.buzbuz.smartautoclicker.domain.putExtra
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -59,12 +60,18 @@ internal class ActionExecutor(
      */
     suspend fun executeActions(actions: List<Action>, conditionPosition: Point?) {
         actions.forEach { action ->
-            when (action) {
-                is Click -> executeClick(action, conditionPosition)
-                is Swipe -> executeSwipe(action)
-                is Pause -> executePause(action)
-                is Action.Intent -> executeIntent(action)
-                is Action.Adb -> if (isAdbEnabled()) executeAdb(action)
+            try {
+                when (action) {
+                    is Click -> executeClick(action, conditionPosition)
+                    is Swipe -> executeSwipe(action)
+                    is Pause -> executePause(action)
+                    is Action.Intent -> executeIntent(action)
+                    is Action.Adb -> if (isAdbEnabled()) executeAdb(action)
+                }
+            } catch (ex: CancellationException) {
+                throw ex
+            } catch (ex: Exception) {
+                Log.w(TAG, "Can't execute the ${action::class.simpleName} action, skipping it", ex)
             }
         }
     }

@@ -100,6 +100,10 @@ internal class BitmapManagerImpl(private val appDataDir: File) : BitmapManager {
                 val buffer = ByteBuffer.allocateDirect(it.channel.size().toInt())
                 it.channel.read(buffer)
                 buffer.position(0)
+                if (width <= 0 || height <= 0 || buffer.capacity() < width * height * 4) {
+                    Log.e(TAG, "Bitmap $path doesn't match its ${width}x$height area.")
+                    return@withContext null
+                }
 
                 cachedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                 cachedBitmap.copyPixelsFromBuffer(buffer)

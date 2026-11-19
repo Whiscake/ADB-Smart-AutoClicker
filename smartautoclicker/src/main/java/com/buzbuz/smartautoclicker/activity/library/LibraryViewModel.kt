@@ -96,18 +96,20 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
 
     private fun parseIndex(indexUrl: String, json: String): List<LibraryConfig> {
         val configs = JSONObject(json).getJSONArray("configs")
-        return (0 until configs.length()).map { i ->
-            configs.getJSONObject(i).run {
-                LibraryConfig(
-                    name = getString("name"),
-                    description = optString("description"),
-                    author = optString("author"),
-                    screen = optString("screen").split("x").mapNotNull { it.trim().toIntOrNull() }
-                        .takeIf { it.size == 2 }?.let { (w, h) -> Point(minOf(w, h), maxOf(w, h)) },
-                    events = optInt("events"),
-                    url = URL(URL(indexUrl), getString("file")).toString(),
-                )
-            }
+        return (0 until configs.length()).mapNotNull { i ->
+            runCatching {
+                configs.getJSONObject(i).run {
+                    LibraryConfig(
+                        name = getString("name"),
+                        description = optString("description"),
+                        author = optString("author"),
+                        screen = optString("screen").split("x").mapNotNull { it.trim().toIntOrNull() }
+                            .takeIf { it.size == 2 }?.let { (w, h) -> Point(minOf(w, h), maxOf(w, h)) },
+                        events = optInt("events"),
+                        url = URL(URL(indexUrl), getString("file")).toString(),
+                    )
+                }
+            }.getOrNull()
         }
     }
 }
@@ -118,7 +120,7 @@ private fun URL.connect(): HttpURLConnection = (openConnection() as HttpURLConne
     if (responseCode != HttpURLConnection.HTTP_OK) throw IllegalStateException("HTTP $responseCode")
 }
 
-private fun URL.readText(): String = connect().inputStream.bufferedReader().use { it.readText() }
+private fun URL.readText(): String = connect().inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
 
 private fun URL.download(target: File) = connect().inputStream.use { input ->
     target.outputStream().use { input.copyTo(it) }
@@ -127,9 +129,10 @@ private fun URL.download(target: File) = connect().inputStream.use { input ->
 fun Context.libraryUrl(): String =
     getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getString(KEY_URL, null) ?: DEFAULT_LIBRARY_URL
 
-fun Context.setLibraryUrl(url: String) = getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit()
-    .putString(KEY_URL, url.trim().ifEmpty { DEFAULT_LIBRARY_URL })
-    .apply()
+fun Context.setLibraryUrl(url: String) = getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit().apply {
+    val custom = url.trim().takeIf { it.isNotEmpty() && it != DEFAULT_LIBRARY_URL }
+    if (custom == null) remove(KEY_URL) else putString(KEY_URL, custom)
+}.apply()
 
 const val DEFAULT_LIBRARY_URL =
     "https://raw.githubusercontent.com/Whiscake/ADB-Smart-AutoClicker/adb-ykwp/library/index.json"

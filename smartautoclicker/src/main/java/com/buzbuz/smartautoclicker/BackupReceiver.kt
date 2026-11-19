@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 
 import com.buzbuz.smartautoclicker.baseui.ScreenMetrics
 import com.buzbuz.smartautoclicker.domain.Backup
@@ -43,14 +44,19 @@ class BackupReceiver : BroadcastReceiver() {
         val pending = goAsync()
 
         CoroutineScope(Dispatchers.IO).launch {
-            val result = when (intent.action) {
-                ACTION_EXPORT -> {
-                    file.delete()
-                    val ids = repository.scenarios.first().map { it.id }
-                    repository.createScenarioBackup(Uri.fromFile(file), ids, screen).finalState()
+            val result = try {
+                when (intent.action) {
+                    ACTION_EXPORT -> {
+                        file.delete()
+                        val ids = repository.scenarios.first().map { it.id }
+                        repository.createScenarioBackup(Uri.fromFile(file), ids, screen).finalState()
+                    }
+                    ACTION_IMPORT -> repository.restoreScenarioBackup(Uri.fromFile(file), screen).finalState()
+                    else -> null
                 }
-                ACTION_IMPORT -> repository.restoreScenarioBackup(Uri.fromFile(file), screen).finalState()
-                else -> null
+            } catch (ex: Exception) {
+                Log.e(TAG, "Backup of ${file.name} failed", ex)
+                null
             }
             pending.resultCode = if (result is Backup.Completed) RESULT_OK else RESULT_FAILED
             pending.resultData = (result as? Backup.Completed)?.successCount?.toString()
@@ -66,3 +72,4 @@ private const val ACTION_IMPORT = "com.buzbuz.smartautoclicker.IMPORT_SCENARIOS"
 private const val EXTRA_FILE = "file"
 private const val RESULT_OK = 1
 private const val RESULT_FAILED = 2
+private const val TAG = "BackupReceiver"

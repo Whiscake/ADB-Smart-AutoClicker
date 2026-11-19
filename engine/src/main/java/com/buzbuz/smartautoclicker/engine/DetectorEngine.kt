@@ -31,12 +31,14 @@ import com.buzbuz.smartautoclicker.baseui.ScreenMetrics
 import com.buzbuz.smartautoclicker.domain.EndCondition
 import com.buzbuz.smartautoclicker.domain.Scenario
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
@@ -69,6 +71,10 @@ class DetectorEngine(context: Context) {
 
         /** Tag for logs */
         private const val TAG = "DetectorEngine"
+        /** Waiting delay when the screen has no new image, instead of polling it endlessly. */
+        private const val NO_IMAGE_DELAY_MS = 10L
+        /** Waiting delay after an image failed to be processed. */
+        private const val ERROR_DELAY_MS = 500L
         /** Singleton preventing multiple instances of the repository at the same time. */
         @Volatile
         private var INSTANCE: DetectorEngine? = null
@@ -261,6 +267,9 @@ class DetectorEngine(context: Context) {
         } else if (_isDetecting.value) {
             Log.w(TAG, "captureArea: detection is already started.")
             return
+        } else if (scenarioEndConditions.value == null) {
+            Log.w(TAG, "startDetection: the scenario is not loaded yet.")
+            return
         }
 
         Log.i(TAG, "startDetection")
@@ -375,11 +384,20 @@ class DetectorEngine(context: Context) {
         }
     }
 
-    /** Process the latest images provided by the [ScreenRecorder] until the processing is cancelled. */
+    /**
+     * Process the latest images provided by the [ScreenRecorder] until the processing is cancelled.
+     * An image that can't be processed is skipped, so one faulty event never stops the scenario.
+     */
     private suspend fun processLatestImage(scenarioProcessor: ScenarioProcessor) {
         while (currentCoroutineContext().isActive) {
-            screenRecorder.acquireLatestImage()?.use { image ->
-                scenarioProcessor.process(image)
+            try {
+                val image = screenRecorder.acquireLatestImage()
+                if (image == null) delay(NO_IMAGE_DELAY_MS) else image.use { scenarioProcessor.process(it) }
+            } catch (ex: CancellationException) {
+                throw ex
+            } catch (ex: Exception) {
+                Log.e(TAG, "Can't process the screen image, skipping it", ex)
+                delay(ERROR_DELAY_MS)
             }
             yield()
         }
