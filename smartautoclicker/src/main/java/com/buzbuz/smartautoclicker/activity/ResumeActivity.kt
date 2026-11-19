@@ -51,11 +51,16 @@ class ResumeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val id = intent.getLongExtra(EXTRA_SCENARIO_ID, lastScenarioId())
+        val name = intent.getStringExtra(EXTRA_SCENARIO_NAME)
         lifecycleScope.launch {
-            scenario = runCatching { Repository.getRepository(this@ResumeActivity).getScenario(id).first() }.getOrNull()
+            scenario = runCatching {
+                val repository = Repository.getRepository(this@ResumeActivity)
+                val id = name?.let { wanted -> repository.scenarios.first().firstOrNull { it.name == wanted }?.id }
+                    ?: intent.getLongExtra(EXTRA_SCENARIO_ID, lastScenarioId())
+                repository.getScenario(id).first()
+            }.getOrNull()
             if (scenario == null) {
-                Log.w(TAG, "No scenario $id to resume")
+                Log.w(TAG, "No scenario ${name ?: ""} to resume")
                 finishAndRemoveTask()
                 return@launch
             }
@@ -65,4 +70,5 @@ class ResumeActivity : AppCompatActivity() {
 }
 
 private const val EXTRA_SCENARIO_ID = "scenario_id"
+private const val EXTRA_SCENARIO_NAME = "scenario_name"
 private const val TAG = "ResumeActivity"
