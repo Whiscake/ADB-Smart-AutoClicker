@@ -60,9 +60,9 @@
         android:textSize="@dimen/text_size_list_item_text_small"
         tools:text="Plays the event stages with the stage clear and login events ready for Dual."/>
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/btn_download"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/margin_horizontal_default"
