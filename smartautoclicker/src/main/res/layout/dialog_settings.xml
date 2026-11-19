@@ -61,4 +61,19 @@
         android:hint="@string/dialog_action_config_adb_token_title"
         android:importantForAutofill="no" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_vertical_default"
+        android:text="@string/dialog_settings_library_title"
+        style="@style/HeaderTitle"/>
+
+    <EditText
+        android:id="@+id/edit_library_url"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/item_height"
+        android:inputType="textUri"
+        android:hint="@string/dialog_settings_library_title"
+        android:importantForAutofill="no" />
+
 </LinearLayout>

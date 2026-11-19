@@ -218,4 +218,14 @@
     <string name="dialog_action_config_adb_host_hint">留空：使用设置中的桥接</string>
     <string name="dialog_action_config_adb_port_hint">留空：使用设置中的桥接</string>
     <string name="dialog_action_config_adb_token_hint">留空：使用设置中的桥接</string>
+    <string name="menu_library_item_title">配置库</string>
+    <string name="dialog_library_title">配置库</string>
+    <string name="dialog_library_download">下载</string>
+    <string name="dialog_library_downloading">正在下载…</string>
+    <string name="dialog_library_close">关闭</string>
+    <string name="dialog_library_refresh">刷新</string>
+    <string name="dialog_library_empty">配置库中还没有配置。</string>
+    <string name="dialog_library_error">无法连接配置库：%1$s</string>
+    <string name="dialog_library_screen_fits">%1$dx%2$d，当前屏幕</string>
+    <string name="dialog_settings_library_title">配置库地址</string>
 </resources>

@@ -48,6 +48,10 @@ import com.buzbuz.smartautoclicker.R
 import com.buzbuz.smartautoclicker.activity.PermissionsDialogFragment.Companion.FRAGMENT_TAG_PERMISSION_DIALOG
 import com.buzbuz.smartautoclicker.activity.backup.BackupDialogFragment
 import com.buzbuz.smartautoclicker.activity.backup.BackupDialogFragment.Companion.FRAGMENT_TAG_BACKUP_DIALOG
+import com.buzbuz.smartautoclicker.activity.library.LibraryDialogFragment
+import com.buzbuz.smartautoclicker.activity.library.LibraryDialogFragment.Companion.FRAGMENT_TAG_LIBRARY_DIALOG
+import com.buzbuz.smartautoclicker.activity.library.libraryUrl
+import com.buzbuz.smartautoclicker.activity.library.setLibraryUrl
 import com.buzbuz.smartautoclicker.baseui.dialog.setCustomTitle
 import com.buzbuz.smartautoclicker.domain.Scenario
 import com.buzbuz.smartautoclicker.engine.Bridge
@@ -182,6 +186,9 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
                     scenarioViewModel.setMenuState(MenuState.EXPORT)
                 }
             R.id.action_import -> showBackupDialog(true)
+            R.id.action_library -> activity?.let {
+                LibraryDialogFragment().show(it.supportFragmentManager, FRAGMENT_TAG_LIBRARY_DIALOG)
+            }
             R.id.action_cancel -> scenarioViewModel.setMenuState(MenuState.SELECTION)
             R.id.action_search -> scenarioViewModel.setMenuState(MenuState.SEARCH)
             R.id.action_select_all -> scenarioViewModel.toggleAllScenarioSelectionForBackup()
@@ -206,6 +213,7 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
         menu.apply {
             findItem(R.id.action_search).isVisible = menuState.searchVisibility
             findItem(R.id.action_import).isVisible = menuState.importBackupVisibility
+            findItem(R.id.action_library).isVisible = menuState.importBackupVisibility
             findItem(R.id.action_settings).isVisible = menuState.importBackupVisibility
             findItem(R.id.action_cancel).isVisible = menuState.cancelVisibility
             findItem(R.id.action_select_all).isVisible = menuState.selectAllVisibility
@@ -289,6 +297,7 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
         binding.editBridgeHost.setText(bridge.host)
         binding.editBridgePort.setText(bridge.port.toString())
         binding.editBridgeToken.setText(bridge.token)
+        binding.editLibraryUrl.setText(context.libraryUrl())
         showDialog(AlertDialog.Builder(context)
             .setCustomTitle(R.layout.view_dialog_title, R.string.dialog_settings_title)
             .setView(binding.root)
@@ -301,6 +310,7 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
                         token = binding.editBridgeToken.text.toString().trim(),
                     )
                 )
+                context.setLibraryUrl(binding.editLibraryUrl.text.toString())
             }
             .setNegativeButton(android.R.string.cancel, null)
             .create())

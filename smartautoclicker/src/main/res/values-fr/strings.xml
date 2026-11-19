@@ -190,4 +190,14 @@
     <string name="dialog_action_config_adb_host_hint">Vide : pont des paramètres</string>
     <string name="dialog_action_config_adb_port_hint">Vide : pont des paramètres</string>
     <string name="dialog_action_config_adb_token_hint">Vide : pont des paramètres</string>
+    <string name="menu_library_item_title">Bibliothèque</string>
+    <string name="dialog_library_title">Bibliothèque</string>
+    <string name="dialog_library_download">Télécharger</string>
+    <string name="dialog_library_downloading">Téléchargement…</string>
+    <string name="dialog_library_close">Fermer</string>
+    <string name="dialog_library_refresh">Actualiser</string>
+    <string name="dialog_library_empty">Aucune configuration dans la bibliothèque.</string>
+    <string name="dialog_library_error">Bibliothèque injoignable : %1$s</string>
+    <string name="dialog_library_screen_fits">%1$dx%2$d, cet écran</string>
+    <string name="dialog_settings_library_title">Adresse de la bibliothèque</string>
 </resources>
