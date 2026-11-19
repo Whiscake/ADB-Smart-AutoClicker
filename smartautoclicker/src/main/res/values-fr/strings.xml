@@ -171,4 +171,23 @@
     <string name="dialog_backup_import_error">Une erreur est survenue et l\'import a été annulée</string>
     <string name="dialog_backup_import_compatibility">Certains scenarios ont été généré par un téléphone avec un écran différent, ce qui peut causer des problèmes avec la détection et les coordonées des actions.\n\nPour régler le problème, vous devez refaire les screenshots de vos conditions et mettre à jour les coordonées de vos actions.</string>
 
+    <string name="menu_settings_item_title">Paramètres</string>
+    <string name="dialog_settings_title">Paramètres</string>
+    <string name="dialog_settings_adb_enabled">Exécuter les actions de commande ADB</string>
+    <string name="menu_cancel_item_title">Annuler</string>
+    <string name="menu_select_all_item_title">Tout sélectionner</string>
+    <string name="menu_import_item_title">Importer</string>
+    <string name="menu_export_item_title">Exporter</string>
+    <string name="dialog_scenario_screen_button">Résolution</string>
+    <string name="dialog_scenario_screen_title">Créé pour la résolution</string>
+    <string name="dialog_scenario_delete_button">Supprimer</string>
+    <string name="menu_delete_item_title">Supprimer la sélection</string>
+    <plurals name="dialog_delete_selected_message">
+        <item quantity="one">Cela supprimera %d scénario. Êtes-vous sûr ?</item>
+        <item quantity="other">Cela supprimera %d scénarios. Êtes-vous sûr ?</item>
+    </plurals>
+    <string name="dialog_settings_bridge_title">Pont (utilisé par les actions ADB aux champs vides)</string>
+    <string name="dialog_action_config_adb_host_hint">Vide : pont des paramètres</string>
+    <string name="dialog_action_config_adb_port_hint">Vide : pont des paramètres</string>
+    <string name="dialog_action_config_adb_token_hint">Vide : pont des paramètres</string>
 </resources>

@@ -19,6 +19,7 @@ package com.buzbuz.smartautoclicker.backup
 import android.content.ContentResolver
 import android.graphics.Point
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.util.Log
 
 import com.buzbuz.smartautoclicker.backup.ext.readEntryFile
@@ -90,7 +91,8 @@ internal class BackupEngineImpl(
                     progress.onCompleted(scenarios, 0, false)
                 }
             } catch (ioEx: IOException) {
-                Log.e(TAG, "Error while creating backup archive.")
+                Log.e(TAG, "Error while creating backup archive.", ioEx)
+                runCatching { DocumentsContract.deleteDocument(contentResolver, zipFileUri) }
                 progress.onError()
             }
         }
@@ -112,8 +114,12 @@ internal class BackupEngineImpl(
                 createNewFile()
             }
 
+            val scenarioScreen = completeScenario.scenario.let { scenario ->
+                if (scenario.screenWidth > 0 && scenario.screenHeight > 0) Point(scenario.screenWidth, scenario.screenHeight)
+                else screenSize
+            }
             outputStream().use { jsonOutStream ->
-                scenarioSerializer.serialize(completeScenario, screenSize, jsonOutStream)
+                scenarioSerializer.serialize(completeScenario, scenarioScreen, jsonOutStream)
             }
         }
 

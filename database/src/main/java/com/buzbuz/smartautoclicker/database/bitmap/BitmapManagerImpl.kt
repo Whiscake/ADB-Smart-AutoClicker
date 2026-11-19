@@ -109,7 +109,7 @@ internal class BitmapManagerImpl(private val appDataDir: File) : BitmapManager {
         for (path in paths) {
             val file = File(appDataDir, path)
             if (!file.exists()) {
-                return
+                continue
             }
 
             Log.d(TAG, "Deleting $path")

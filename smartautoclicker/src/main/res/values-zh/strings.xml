@@ -199,4 +199,23 @@
     <string name="dialog_backup_import_completed_with_error">已完成导入 \n%1$d 个方案，错误 \n%2d 个</string>
     <string name="dialog_backup_import_error">发生错误，备份导入已取消</string>
     <string name="dialog_backup_import_compatibility">某些导入的场景是从具有不同屏幕的设备生成的，这可能会导致检测和操作坐标出现问题。\n\n要修复它，您需要根据您的情况创建新的屏幕截图并更新您的点击/滑动位置。</string>
+    <string name="menu_settings_item_title">设置</string>
+    <string name="dialog_settings_title">设置</string>
+    <string name="dialog_settings_adb_enabled">执行 ADB 命令动作</string>
+    <string name="menu_cancel_item_title">取消</string>
+    <string name="menu_select_all_item_title">全选</string>
+    <string name="menu_import_item_title">导入</string>
+    <string name="menu_export_item_title">导出</string>
+    <string name="dialog_scenario_screen_button">分辨率</string>
+    <string name="dialog_scenario_screen_title">创建时的分辨率</string>
+    <string name="dialog_scenario_delete_button">删除</string>
+    <string name="menu_delete_item_title">删除所选</string>
+    <plurals name="dialog_delete_selected_message">
+        <item quantity="one">这将删除 %d 个场景。确定吗？</item>
+        <item quantity="other">这将删除 %d 个场景。确定吗？</item>
+    </plurals>
+    <string name="dialog_settings_bridge_title">桥接（字段为空的 ADB 动作使用）</string>
+    <string name="dialog_action_config_adb_host_hint">留空：使用设置中的桥接</string>
+    <string name="dialog_action_config_adb_port_hint">留空：使用设置中的桥接</string>
+    <string name="dialog_action_config_adb_token_hint">留空：使用设置中的桥接</string>
 </resources>

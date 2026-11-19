@@ -130,6 +130,26 @@ class EventDaoTests {
     }
 
     @Test
+    fun addEvent_keepActionOrderFromPriority() = runTest {
+        val completeEvent = CompleteEventEntity(
+            event = TestsData.getNewEventEntity(id = TestsData.EVENT_ID, scenarioId = TestsData.SCENARIO_ID, priority = 0),
+            actions = listOf(
+                TestsData.getNewPauseEntity(id = 10, eventId = 0L, priority = 1, pauseDuration = 1L),
+                TestsData.getNewPauseEntity(id = 11, eventId = 0L, priority = 2, pauseDuration = 2L),
+                TestsData.getNewPauseEntity(id = 12, eventId = 0L, priority = 0, pauseDuration = 0L),
+            ),
+            conditions = listOf(TestsData.getNewConditionEntity(eventId = 0L))
+        )
+        database.eventDao().addCompleteEvent(completeEvent)
+
+        val databaseEvent = database.eventDao().getEvent(TestsData.EVENT_ID)
+        databaseEvent.actions.sortedBy { it.action.priority }.forEachIndexed { index, completeAction ->
+            assertEquals(index, completeAction.action.priority)
+            assertEquals(index.toLong(), completeAction.action.pauseDuration)
+        }
+    }
+
+    @Test
     fun deleteEvent() = runTest {
         val completeEvent = CompleteEventEntity(
             event = TestsData.getNewEventEntity(id = TestsData.EVENT_ID, scenarioId = TestsData.SCENARIO_ID, priority = 0),

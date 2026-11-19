@@ -43,6 +43,8 @@ data class ScenarioEntity(
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "detection_quality") val detectionQuality: Int,
     @ColumnInfo(name = "end_condition_operator") val endConditionOperator: Int,
+    @ColumnInfo(name = "screen_width", defaultValue = "0") val screenWidth: Int = 0,
+    @ColumnInfo(name = "screen_height", defaultValue = "0") val screenHeight: Int = 0,
 )
 
 /**

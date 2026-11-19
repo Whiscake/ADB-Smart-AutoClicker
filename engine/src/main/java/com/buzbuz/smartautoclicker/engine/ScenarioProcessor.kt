@@ -55,10 +55,12 @@ internal class ScenarioProcessor(
     endConditions: List<EndCondition>,
     onEndConditionReached: () -> Unit,
     private val debugEngine: DebugEngine? = null,
+    isAdbEnabled: () -> Boolean = { true },
+    bridge: () -> Bridge = { Bridge(DEFAULT_BRIDGE_HOST, DEFAULT_BRIDGE_PORT, "") },
 ) {
 
     /** Execute the detected event actions. */
-    private val actionExecutor = ActionExecutor(androidExecutor)
+    private val actionExecutor = ActionExecutor(androidExecutor, isAdbEnabled, bridge)
     /** Verifies the end conditions of a scenario. */
     private val endConditionVerifier = EndConditionVerifier(endConditions, endConditionOperator, onEndConditionReached)
 

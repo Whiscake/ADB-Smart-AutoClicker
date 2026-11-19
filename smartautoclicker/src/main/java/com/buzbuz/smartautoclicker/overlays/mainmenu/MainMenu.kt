@@ -19,6 +19,7 @@ package com.buzbuz.smartautoclicker.overlays.mainmenu
 import android.content.Context
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.View
 import android.view.WindowManager
@@ -106,9 +107,21 @@ class MainMenu(context: Context, private val scenario: Scenario) : OverlayMenuCo
     override fun onStart() {
         super.onStart()
 
-        getMenuItemView<View>(R.id.btn_play)?.setOnLongClickListener {
-            viewModel?.toggleDetection(true)
-            true
+        getMenuItemView<View>(R.id.btn_play)?.apply {
+            setOnLongClickListener {
+                viewModel?.toggleDetection(true)
+                true
+            }
+            setOnTouchListener { _, event ->
+                val stop = event.actionMasked == MotionEvent.ACTION_DOWN && viewModel?.isDetecting() == true
+                if (stop) viewModel?.toggleDetection()
+                stop
+            }
+        }
+        getMenuItemView<View>(R.id.btn_stop)?.setOnTouchListener { _, event ->
+            val stop = event.actionMasked == MotionEvent.ACTION_DOWN
+            if (stop) dismiss()
+            stop
         }
     }
 

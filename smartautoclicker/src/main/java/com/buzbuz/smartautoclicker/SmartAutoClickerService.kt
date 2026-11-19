@@ -37,6 +37,7 @@ import com.buzbuz.smartautoclicker.overlays.mainmenu.MainMenu
 import com.buzbuz.smartautoclicker.domain.Scenario
 import com.buzbuz.smartautoclicker.engine.AndroidExecutor
 import com.buzbuz.smartautoclicker.engine.DetectorEngine
+import com.buzbuz.smartautoclicker.engine.setLastScenarioId
 
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -111,7 +112,7 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
          * [android.app.Activity.onActivityResult]
          * @param scenario the identifier of the scenario of clicks to be used for detection.
          */
-        fun start(resultCode: Int, data: Intent, scenario: Scenario) {
+        fun start(resultCode: Int, data: Intent, scenario: Scenario, autoPlay: Boolean = false) {
             if (isStarted) {
                 return
             }
@@ -121,7 +122,9 @@ class SmartAutoClickerService : AccessibilityService(), AndroidExecutor {
 
             detectorEngine = DetectorEngine.getDetectorEngine(this@SmartAutoClickerService).apply {
                 startScreenRecord(this@SmartAutoClickerService, resultCode, data, scenario, this@SmartAutoClickerService)
+                if (autoPlay) startDetectionWhenReady()
             }
+            setLastScenarioId(scenario.id)
 
             rootOverlayController = MainMenu(this@SmartAutoClickerService, scenario).apply {
                 create(::stop)

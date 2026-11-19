@@ -24,6 +24,13 @@
         <item name="autoCompleteTextViewStyle">@style/SearchView</item>
     </style>
 
+    <style name="InvisibleTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorPrimary">@color/textTitle</item>
         <item name="actionMenuTextColor">@color/textTitle</item>

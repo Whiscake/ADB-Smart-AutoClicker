@@ -82,6 +82,8 @@ class MainMenuModel(context: Context) : OverlayViewModel(context) {
         }
 
     /** Start/Stop the detection. */
+    fun isDetecting(): Boolean = detectorEngine.isDetecting.value
+
     fun toggleDetection(debugMode: Boolean = false) {
         detectorEngine.apply {
             if (isDetecting.value) {

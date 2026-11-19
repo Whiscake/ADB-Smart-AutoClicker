@@ -50,7 +50,15 @@ import com.buzbuz.smartautoclicker.activity.backup.BackupDialogFragment
 import com.buzbuz.smartautoclicker.activity.backup.BackupDialogFragment.Companion.FRAGMENT_TAG_BACKUP_DIALOG
 import com.buzbuz.smartautoclicker.baseui.dialog.setCustomTitle
 import com.buzbuz.smartautoclicker.domain.Scenario
+import com.buzbuz.smartautoclicker.engine.Bridge
+import com.buzbuz.smartautoclicker.engine.DEFAULT_BRIDGE_HOST
+import com.buzbuz.smartautoclicker.engine.DEFAULT_BRIDGE_PORT
+import com.buzbuz.smartautoclicker.engine.bridge
+import com.buzbuz.smartautoclicker.engine.isAdbEnabled
+import com.buzbuz.smartautoclicker.engine.setAdbEnabled
+import com.buzbuz.smartautoclicker.engine.setBridge
 import com.buzbuz.smartautoclicker.databinding.DialogEditBinding
+import com.buzbuz.smartautoclicker.databinding.DialogSettingsBinding
 import com.buzbuz.smartautoclicker.databinding.FragmentScenariosBinding
 import com.buzbuz.smartautoclicker.databinding.MergeLoadableListBinding
 
@@ -93,7 +101,6 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
 
         scenariosAdapter = ScenarioAdapter(
             startScenarioListener = ::onStartClicked,
-            deleteScenarioListener = ::onDeleteClicked,
             editClickListener = ::onRenameClicked,
             exportClickListener = ::onExportClicked,
         )
@@ -104,7 +111,7 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
             } else {
                 requestedScenario?.let { scenario ->
                     scenarioViewModel.loadScenario(result.resultCode, result.data!!, scenario)
-                    activity?.finish()
+                    activity?.finishAndRemoveTask()
                 }
             }
         }
@@ -178,6 +185,13 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
             R.id.action_cancel -> scenarioViewModel.setMenuState(MenuState.SELECTION)
             R.id.action_search -> scenarioViewModel.setMenuState(MenuState.SEARCH)
             R.id.action_select_all -> scenarioViewModel.toggleAllScenarioSelectionForBackup()
+            R.id.action_settings -> showSettingsDialog()
+            R.id.action_delete ->
+                if (scenarioViewModel.menuState.value == MenuState.DELETE) {
+                    onDeleteSelectedClicked()
+                } else {
+                    scenarioViewModel.setMenuState(MenuState.DELETE)
+                }
             else -> return super.onOptionsItemSelected(item)
         }
 
@@ -192,13 +206,23 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
         menu.apply {
             findItem(R.id.action_search).isVisible = menuState.searchVisibility
             findItem(R.id.action_import).isVisible = menuState.importBackupVisibility
+            findItem(R.id.action_settings).isVisible = menuState.importBackupVisibility
             findItem(R.id.action_cancel).isVisible = menuState.cancelVisibility
             findItem(R.id.action_select_all).isVisible = menuState.selectAllVisibility
             findItem(R.id.action_export).apply {
                 isVisible = menuState.createBackupVisibility
                 isEnabled = menuState.createBackupEnabled
+                setShowAsAction(showAsAction(menuState.state == MenuState.EXPORT))
                 icon = icon?.mutate()?.apply {
                     alpha = menuState.createBackupAlpha
+                }
+            }
+            findItem(R.id.action_delete).apply {
+                isVisible = menuState.deleteVisibility
+                isEnabled = menuState.deleteEnabled
+                setShowAsAction(showAsAction(menuState.state == MenuState.DELETE))
+                icon = icon?.mutate()?.apply {
+                    alpha = if (menuState.deleteEnabled) 255 else 127
                 }
             }
         }
@@ -240,6 +264,48 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
     }
 
     /** Show the media projection start warning. */
+    private fun showScreenDialog(scenario: Scenario) {
+        val current = SCENARIO_SCREENS.indexOfFirst { (width, height) ->
+            minOf(scenario.screenWidth, scenario.screenHeight) == width &&
+                    maxOf(scenario.screenWidth, scenario.screenHeight) == height
+        }
+        showDialog(AlertDialog.Builder(requireContext())
+            .setCustomTitle(R.layout.view_dialog_title, R.string.dialog_scenario_screen_title)
+            .setSingleChoiceItems(SCENARIO_SCREENS.map { (width, height) -> "${width}x$height" }.toTypedArray(), current) {
+                dialog, index ->
+                val (width, height) = SCENARIO_SCREENS[index]
+                scenarioViewModel.setScenarioScreen(scenario, width, height)
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create())
+    }
+
+    private fun showSettingsDialog() {
+        val context = requireContext()
+        val binding = DialogSettingsBinding.inflate(LayoutInflater.from(context))
+        val bridge = context.bridge()
+        binding.checkAdbEnabled.isChecked = context.isAdbEnabled()
+        binding.editBridgeHost.setText(bridge.host)
+        binding.editBridgePort.setText(bridge.port.toString())
+        binding.editBridgeToken.setText(bridge.token)
+        showDialog(AlertDialog.Builder(context)
+            .setCustomTitle(R.layout.view_dialog_title, R.string.dialog_settings_title)
+            .setView(binding.root)
+            .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
+                context.setAdbEnabled(binding.checkAdbEnabled.isChecked)
+                context.setBridge(
+                    Bridge(
+                        host = binding.editBridgeHost.text.toString().trim().ifEmpty { DEFAULT_BRIDGE_HOST },
+                        port = binding.editBridgePort.text.toString().toIntOrNull() ?: DEFAULT_BRIDGE_PORT,
+                        token = binding.editBridgeToken.text.toString().trim(),
+                    )
+                )
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create())
+    }
+
     private fun showMediaProjectionWarning() {
         getSystemService(requireContext(), MediaProjectionManager::class.java)?.let { projectionManager ->
             projectionActivityResult.launch(projectionManager.createScreenCaptureIntent())
@@ -277,6 +343,18 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
      *
      * @param scenario the scenario to delete.
      */
+    private fun onDeleteSelectedClicked() {
+        val count = scenarioViewModel.getScenariosSelectedForBackup().size
+        showDialog(AlertDialog.Builder(requireContext())
+            .setCustomTitle(R.layout.view_dialog_title, R.string.dialog_delete_scenario_title)
+            .setMessage(resources.getQuantityString(R.plurals.dialog_delete_selected_message, count, count))
+            .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
+                scenarioViewModel.deleteSelectedScenarios()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create())
+    }
+
     private fun onDeleteClicked(scenario: Scenario) {
         showDialog(AlertDialog.Builder(requireContext())
             .setCustomTitle(R.layout.view_dialog_title, R.string.dialog_delete_scenario_title)
@@ -302,7 +380,12 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
             .setPositiveButton(android.R.string.ok) { _: DialogInterface, _: Int ->
                 scenarioViewModel.renameScenario(scenario, dialogViewBinding.editName.text.toString())
             }
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(R.string.dialog_scenario_delete_button) { _: DialogInterface, _: Int ->
+                onDeleteClicked(scenario)
+            }
+            .setNeutralButton(R.string.dialog_scenario_screen_button) { _: DialogInterface, _: Int ->
+                showScreenDialog(scenario)
+            }
             .create()
         dialog.setOnShowListener {
             dialogViewBinding.editName.apply {
@@ -352,3 +435,8 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
 const val FRAGMENT_TAG_SCENARIO_LIST = "ScenarioList"
 /** Tag for logs. */
 private const val TAG = "ScenarioListFragment"
+
+private val SCENARIO_SCREENS = listOf(720 to 1280, 900 to 1600, 1080 to 1920)
+
+private fun showAsAction(inToolbar: Boolean): Int =
+    if (inToolbar) MenuItem.SHOW_AS_ACTION_ALWAYS else MenuItem.SHOW_AS_ACTION_NEVER

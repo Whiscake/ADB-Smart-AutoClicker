@@ -98,7 +98,7 @@
             android:layout_height="@dimen/item_height"
             android:layout_marginStart="@dimen/margin_horizontal_small"
             android:layout_marginEnd="@dimen/margin_horizontal_small"
-            android:inputType="textPassword"
+            android:inputType="text"
             android:hint="@string/dialog_action_config_adb_token_hint"
             android:importantForAutofill="no" />
 

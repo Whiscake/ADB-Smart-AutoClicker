@@ -70,24 +70,6 @@
         android:id="@+id/btn_rename"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_toStartOf="@id/btn_delete"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/margin_horizontal_default"
-        android:paddingStart="@dimen/margin_horizontal_mini"
-        android:paddingEnd="@dimen/margin_horizontal_mini"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btn_export"
-        app:layout_constraintEnd_toStartOf="@id/btn_delete"
-        android:scaleType="center"
-        android:src="@drawable/ic_rename"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/content_desc_delete_scenario" />
-
-    <ImageButton
-        android:id="@+id/btn_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/margin_horizontal_default"
@@ -96,11 +78,11 @@
         android:paddingEnd="@dimen/margin_horizontal_mini"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btn_rename"
+        app:layout_constraintStart_toEndOf="@id/btn_export"
         app:layout_constraintEnd_toEndOf="parent"
         android:scaleType="center"
-        android:src="@drawable/ic_cancel"
+        android:src="@drawable/ic_rename"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/content_desc_delete_scenario" />
+        android:contentDescription="@string/dialog_rename_scenario_title" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

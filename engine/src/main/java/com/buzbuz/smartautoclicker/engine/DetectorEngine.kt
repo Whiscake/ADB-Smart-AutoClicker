@@ -26,7 +26,6 @@ import android.util.Log
 
 import com.buzbuz.smartautoclicker.domain.Repository
 import com.buzbuz.smartautoclicker.domain.Event
-import com.buzbuz.smartautoclicker.detection.ImageDetector
 import com.buzbuz.smartautoclicker.detection.NativeDetector
 import com.buzbuz.smartautoclicker.baseui.ScreenMetrics
 import com.buzbuz.smartautoclicker.domain.EndCondition
@@ -37,17 +36,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 
 /**
  * Detects [Event] conditions on a display and execute its actions.
@@ -99,13 +101,10 @@ class DetectorEngine(context: Context) {
     private val scenarioRepository = Repository.getRepository(context)
     /** Monitors the state of the screen. */
     private val screenMetrics = ScreenMetrics(context)
+    private val appContext = context.applicationContext
 
     /** Record the screen and provide images via [ScreenRecorder.acquireLatestImage]. */
     private val screenRecorder = ScreenRecorder()
-    /** Process the events conditions to detect them on the screen. */
-    private var scenarioProcessor: ScenarioProcessor? = null
-    /** Detect the condition images on the screen image. */
-    private var imageDetector: ImageDetector? = null
     /** The executor for the actions requiring an interaction with Android. */
     private var androidExecutor: AndroidExecutor? = null
 
@@ -269,10 +268,13 @@ class DetectorEngine(context: Context) {
         _isDetecting.value = true
         _isDebugging.value = debugMode
 
-        processingJob = processingScope?.launch {
-            imageDetector = NativeDetector()
-            scenarioProcessor = ScenarioProcessor(
-                imageDetector = imageDetector!!,
+        processingJob = launchProcessing(debugMode)
+    }
+
+    private fun launchProcessing(debugMode: Boolean): Job? = processingScope?.launch {
+        NativeDetector().use { imageDetector ->
+            val scenarioProcessor = ScenarioProcessor(
+                imageDetector = imageDetector,
                 detectionQuality = scenarioEndConditions.value!!.first.detectionQuality,
                 events = scenarioEvents.value,
                 bitmapSupplier = { path, width, height ->
@@ -288,9 +290,11 @@ class DetectorEngine(context: Context) {
                     stopDetection()
                 },
                 debugEngine = if (debugMode) debugEngine else null,
+                isAdbEnabled = appContext::isAdbEnabled,
+                bridge = appContext::bridge,
             )
 
-            processLatestImage()
+            processLatestImage(scenarioProcessor)
         }
     }
 
@@ -301,18 +305,26 @@ class DetectorEngine(context: Context) {
      * image. Note that this will not stop the screen recording, you should still call [stopScreenRecord] to completely
      * release the [DetectorEngine] resources.
      */
+    fun startDetectionWhenReady() {
+        detectorEngineScope.launch {
+            isScreenRecording.first { it }
+            scenarioEvents.first { it.isNotEmpty() }
+            scenarioEndConditions.first { it != null }
+            withContext(Dispatchers.Main) { startDetection() }
+        }
+    }
+
     fun stopDetection() {
+        Log.i(TAG, "stopDetection")
+
+        _isDetecting.value = false
+        _isDebugging.value = false
+
+        val job = processingJob
+        processingJob = null
+        job?.cancel()
         processingScope?.launch {
-            Log.i(TAG, "stopDetection")
-
-            _isDetecting.value = false
-            _isDebugging.value = false
-
-            processingJob?.cancelAndJoin()
-            processingJob = null
-            imageDetector?.close()
-            imageDetector = null
-            scenarioProcessor = null
+            job?.join()
             debugEngine.clear()
         }
     }
@@ -350,27 +362,26 @@ class DetectorEngine(context: Context) {
      * @param context the Android context.
      */
     private fun onOrientationChanged(context: Context) {
+        val job = processingJob
+        processingJob = null
+        job?.cancel()
         processingScope?.launch {
-            processingJob?.cancelAndJoin()
+            job?.join()
 
             screenRecorder.stopScreenRecord()
             screenRecorder.startScreenRecord(context, screenMetrics.screenSize)
 
-            processingJob = processingScope?.launch {
-                processLatestImage()
-            }
+            if (job != null && _isDetecting.value) processingJob = launchProcessing(_isDebugging.value)
         }
     }
 
-    /** Process the latest image provided by the [ScreenRecorder]. */
-    private suspend fun processLatestImage() {
-        screenRecorder.acquireLatestImage()?.use { image ->
-            scenarioProcessor?.process(image)
-        }
-
-        // This screen image processing is done, go to the next one.
-        processingJob = processingScope?.launch {
-            processLatestImage()
+    /** Process the latest images provided by the [ScreenRecorder] until the processing is cancelled. */
+    private suspend fun processLatestImage(scenarioProcessor: ScenarioProcessor) {
+        while (currentCoroutineContext().isActive) {
+            screenRecorder.acquireLatestImage()?.use { image ->
+                scenarioProcessor.process(image)
+            }
+            yield()
         }
     }
 
