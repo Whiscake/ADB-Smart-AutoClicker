@@ -63,6 +63,7 @@ import com.buzbuz.smartautoclicker.activity.news.consumeNewVersion
 import com.buzbuz.smartautoclicker.activity.news.consumeReleaseNotice
 import com.buzbuz.smartautoclicker.activity.news.isFreshInstall
 import com.buzbuz.smartautoclicker.baseui.dialog.setCustomTitle
+import com.buzbuz.smartautoclicker.overlays.utils.hideSecret
 import com.buzbuz.smartautoclicker.domain.Scenario
 import com.buzbuz.smartautoclicker.engine.Bridge
 import com.buzbuz.smartautoclicker.engine.DEFAULT_BRIDGE_HOST
@@ -351,6 +352,7 @@ class ScenarioListFragment : Fragment(), PermissionsDialogFragment.PermissionDia
         binding.editBridgeHost.setText(bridge.host)
         binding.editBridgePort.setText(bridge.port.toString())
         binding.editBridgeToken.setText(bridge.token)
+        binding.editBridgeToken.hideSecret(binding.btnBridgeTokenEye)
         binding.editLibraryUrl.setText(context.libraryUrl())
         binding.checkNotifications.isChecked = context.areNotificationsEnabled()
         showDialog(AlertDialog.Builder(context)

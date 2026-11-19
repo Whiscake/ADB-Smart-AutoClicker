@@ -26,6 +26,7 @@ import androidx.lifecycle.repeatOnLifecycle
 
 import com.buzbuz.smartautoclicker.databinding.IncludeAdbConfigBinding
 import com.buzbuz.smartautoclicker.overlays.utils.OnAfterTextChangedListener
+import com.buzbuz.smartautoclicker.overlays.utils.hideSecret
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -42,6 +43,7 @@ fun IncludeAdbConfigBinding.setupAdbUi(
     editAdbPort.onTextChanged { adbModel.setPort(it?.toIntOrNull()) }
     editAdbCommand.onTextChanged { adbModel.setCommand(it) }
     editAdbToken.onTextChanged { adbModel.setToken(it) }
+    editAdbToken.hideSecret(btnAdbTokenEye)
 
     lifecycleScope.launch {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

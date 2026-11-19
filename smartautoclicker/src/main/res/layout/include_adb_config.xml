@@ -92,15 +92,31 @@
 
         <include layout="@layout/include_view_separator"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
         <EditText
             android:id="@+id/edit_adb_token"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="@dimen/item_height"
             android:layout_marginStart="@dimen/margin_horizontal_small"
-            android:layout_marginEnd="@dimen/margin_horizontal_small"
-            android:inputType="text"
+            android:inputType="text|textNoSuggestions"
             android:hint="@string/dialog_action_config_adb_token_hint"
             android:importantForAutofill="no" />
+
+        <ImageView
+            android:id="@+id/btn_adb_token_eye"
+            android:layout_width="@dimen/item_height"
+            android:layout_height="@dimen/item_height"
+            android:scaleType="center"
+            android:src="@drawable/ic_visibility"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/content_desc_show_token"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

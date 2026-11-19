@@ -53,13 +53,30 @@
         android:hint="@string/dialog_action_config_adb_port_title"
         android:importantForAutofill="no" />
 
-    <EditText
-        android:id="@+id/edit_bridge_token"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/item_height"
-        android:inputType="text"
-        android:hint="@string/dialog_action_config_adb_token_title"
-        android:importantForAutofill="no" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/edit_bridge_token"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/item_height"
+            android:inputType="text|textNoSuggestions"
+            android:hint="@string/dialog_action_config_adb_token_title"
+            android:importantForAutofill="no" />
+
+        <ImageView
+            android:id="@+id/btn_bridge_token_eye"
+            android:layout_width="@dimen/item_height"
+            android:layout_height="@dimen/item_height"
+            android:scaleType="center"
+            android:src="@drawable/ic_visibility"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/content_desc_show_token"/>
+
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"

@@ -26,6 +26,8 @@
         <item>Export and delete several configs at once</item>
         <item>Dual can resume the last config, export, import and set the bridge without opening the app</item>
         <item>Play and stop in the floating menu act on the first touch</item>
+        <item>The bridge token is hidden behind dots, the eye next to it shows it</item>
+        <item>Dual can open a config by its name and press play on it when it is already open</item>
     </string-array>
 
     <string-array name="news_fixes" translatable="false">

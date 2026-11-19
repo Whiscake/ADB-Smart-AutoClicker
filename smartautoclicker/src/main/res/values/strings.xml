@@ -286,4 +286,5 @@
     <string name="tutorial_more_text">Import and Export configs as zip files, and Delete selected. To export or delete, tap the configs to select them, then tap the button again.</string>
     <string name="tutorial_end_title">All set</string>
     <string name="tutorial_end_text">While a config runs, the floating menu starts and stops it: one tap on play or stop acts right away.</string>
+    <string name="content_desc_show_token">Show or hide the token</string>
 </resources>

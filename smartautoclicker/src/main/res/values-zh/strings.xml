@@ -272,4 +272,5 @@
     <string name="tutorial_more_text">以 zip 文件导入和导出配置，以及删除所选。导出或删除时，先点配置进行选择，再点一次该按钮。</string>
     <string name="tutorial_end_title">准备就绪</string>
     <string name="tutorial_end_text">配置运行时，悬浮菜单负责启动和停止：点一下播放或停止即可立即生效。</string>
+    <string name="content_desc_show_token">显示或隐藏令牌</string>
 </resources>

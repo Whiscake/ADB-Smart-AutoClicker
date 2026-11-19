@@ -244,4 +244,5 @@
     <string name="tutorial_more_text">Importer et Exporter des configurations en fichiers zip, et Supprimer la sélection. Pour exporter ou supprimer, touchez les configurations pour les sélectionner, puis touchez à nouveau le bouton.</string>
     <string name="tutorial_end_title">C\'est prêt</string>
     <string name="tutorial_end_text">Pendant qu\'une configuration tourne, le menu flottant la lance et l\'arrête : un seul appui sur lecture ou stop agit tout de suite.</string>
+    <string name="content_desc_show_token">Afficher ou masquer le jeton</string>
 </resources>
