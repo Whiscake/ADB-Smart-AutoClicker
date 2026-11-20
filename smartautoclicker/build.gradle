@@ -35,8 +35,8 @@ android {
         applicationId "com.puni.smartautoclicker"
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.compileSdkVersion
-        versionCode 17
-        versionName "1.6.0"
+        versionCode 18
+        versionName "1.6.1"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

@@ -60,7 +60,7 @@ Smart AutoClicker is an Android application allowing to automate repetitive task
 **Download:** [smartautoclicker.apk](https://github.com/barone138/ykwp-clicker-library/releases/latest/download/smartautoclicker.apk) (latest version). If another build of the clicker is already installed and
 Android refuses the update, export your configs, uninstall it, install this one and import them again.
 
-## What this fork adds (1.6.0)
+## What this fork adds (1.6.1)
 
 **New**
 - **Library** (button next to the settings): ready-made configs listed in
@@ -80,6 +80,8 @@ Android refuses the update, export your configs, uninstall it, install this one 
   config by its name and press play on it, also after an emulator restart.
 
 **Fixes**
+- When the emulator stops sending screen images, for example after the computer screen went to sleep, the clicker
+  starts the screen capture again by itself instead of standing still.
 - Tapping a config while selecting configs to export or delete selects it instead of starting it.
 - The floating menu opens in the top right corner until you move it, where most configs expect it.
 - Two condition images with the same hash no longer replace each other when saving or importing.
