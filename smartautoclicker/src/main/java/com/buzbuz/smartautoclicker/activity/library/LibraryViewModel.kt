@@ -39,6 +39,9 @@ import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 /** A config listed in the library index. */
 data class LibraryConfig(
@@ -49,7 +52,11 @@ data class LibraryConfig(
     val events: Int,
     val tags: List<String>,
     val url: String,
+    val updated: String,
 )
+
+/** How the library list is ordered. */
+enum class LibrarySort { NEWEST, NAME }
 
 /** What the library list is narrowed to: a text searched everywhere, then the advanced filters. */
 data class LibraryFilter(
@@ -57,6 +64,7 @@ data class LibraryFilter(
     val screen: Point? = null,
     val author: String? = null,
     val tags: Set<String> = emptySet(),
+    val sort: LibrarySort = LibrarySort.NEWEST,
 ) {
     val isAdvanced: Boolean get() = screen != null || author != null || tags.isNotEmpty()
 
@@ -97,7 +105,7 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
                 val configs = withContext(Dispatchers.IO) {
                     URL(index).fetchText().let { text -> parseIndex(index, text).also { application().librarySeen(text) } }
                 }
-                LibraryState.Loaded(configs.sortedWith(compareBy({ it.screen != screen }, { it.name.lowercase() })))
+                LibraryState.Loaded(configs)
             } catch (ex: Exception) {
                 LibraryState.Error(ex.message ?: ex.javaClass.simpleName)
             }
@@ -106,6 +114,15 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
 
     fun setFilter(filter: LibraryFilter) {
         _filter.value = filter
+    }
+
+    /** The configs the filter lets through, newest first or by name; configs made for this screen come first on ties. */
+    fun shown(configs: List<LibraryConfig>, filter: LibraryFilter): List<LibraryConfig> {
+        val byName = compareBy<LibraryConfig>({ it.screen != screen }, { it.name.lowercase() })
+        return configs.filter(filter::matches).sortedWith(
+            if (filter.sort == LibrarySort.NEWEST) compareByDescending<LibraryConfig> { it.updated }.then(byName)
+            else byName
+        )
     }
 
     fun download(config: LibraryConfig) {
@@ -139,6 +156,7 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
                         events = optInt("events"),
                         tags = optJSONArray("tags").strings().map(LibraryTags::canonical).distinct(),
                         url = URL(URL(indexUrl), getString("file")).toString(),
+                        updated = optString("updated").trim().takeIf { DATE.matches(it) } ?: "",
                     )
                 }
             }.getOrNull()
@@ -170,6 +188,13 @@ fun Context.setLibraryUrl(url: String) = getSharedPreferences(PREFERENCES_NAME, 
 }.apply()
 
 const val DEFAULT_LIBRARY_URL = "https://raw.githubusercontent.com/barone138/ykwp-clicker-library/main/index.json"
+
+private val DATE = Regex("""\d{4}-\d{2}-\d{2}""")
+
+/** The date of the index, "2026-11-20", written the way the device shows dates. */
+fun displayDate(date: String): String = runCatching {
+    DateFormat.getDateInstance(DateFormat.MEDIUM).format(SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(date)!!)
+}.getOrDefault(date)
 
 private const val PREFERENCES_NAME = "Library"
 private const val KEY_URL = "Index_Url"

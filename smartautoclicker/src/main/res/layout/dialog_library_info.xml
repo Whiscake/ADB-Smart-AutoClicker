@@ -50,6 +50,11 @@
                 <TextView android:id="@+id/events" style="@style/LibraryInfoValue" tools:text="23"/>
             </TableRow>
 
+            <TableRow android:paddingBottom="@dimen/margin_vertical_default">
+                <TextView style="@style/LibraryInfoLabel" android:text="@string/dialog_library_updated"/>
+                <TextView android:id="@+id/updated" style="@style/LibraryInfoValue" tools:text="20 Nov 2026"/>
+            </TableRow>
+
             <TableRow android:id="@+id/row_tags" android:paddingBottom="@dimen/margin_vertical_default">
                 <TextView style="@style/LibraryInfoLabel" android:text="@string/dialog_library_tags"/>
                 <TextView android:id="@+id/tags" style="@style/LibraryInfoValue" tools:text="● Gates"/>

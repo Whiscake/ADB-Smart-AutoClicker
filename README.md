@@ -60,13 +60,14 @@ Smart AutoClicker is an Android application allowing to automate repetitive task
 **Download:** [smartautoclicker.apk](https://github.com/barone138/ykwp-clicker-library/releases/latest/download/smartautoclicker.apk) (latest version). If another build of the clicker is already installed and
 Android refuses the update, export your configs, uninstall it, install this one and import them again.
 
-## What this fork adds (1.6.1)
+## What this fork adds (1.7.0)
 
 **New**
 - **Library** (button next to the settings): ready-made configs listed in
   [ykwp-clicker-library](https://github.com/barone138/ykwp-clicker-library), with an info page (author, resolution,
   events, tags, description), colored tags, a search and filters by resolution, author and tags. A downloaded config
-  gets the resolution written in the library. A red **!** on the button means the library changed since you last
+  gets the resolution written in the library. Each config shows the date it was added or last updated, and the list
+  starts with the newest ones (**Sort** switches to names). A red **!** on the button means the library changed since you last
   opened it. The library is updated online, with no new APK.
 - **News and tutorial** (the **i** button): what changed in this version, and a tour of the buttons of the config list.
   A red **!** on it means a new version of the clicker is out, with a Download button.

@@ -239,6 +239,10 @@
     <string name="dialog_library_description">描述</string>
     <string name="dialog_library_info">信息</string>
     <string name="dialog_library_no_match">没有匹配的配置。</string>
+    <string name="dialog_library_updated">更新日期</string>
+    <string name="dialog_library_sort">排序</string>
+    <string name="dialog_library_sort_newest">最新优先</string>
+    <string name="dialog_library_sort_name">名称</string>
     <string name="menu_news_item_title">更新内容</string>
     <string name="dialog_news_title">更新内容 · %1$s</string>
     <string name="dialog_news_features">新功能</string>

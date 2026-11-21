@@ -18,6 +18,8 @@
 <resources>
 
     <string-array name="news_features" translatable="false">
+        <item>Library: each config shows the date it was added or last updated, next to it and in its info page</item>
+        <item>Library: the list starts with the newest configs; Sort switches to names</item>
         <item>Library: ready-made configs to download, with an info page, colored tags, search and filters by resolution, author and tags</item>
         <item>A red ! on the Library button when the library changes, and on the i button when a new version of the clicker is out</item>
         <item>News page and a tutorial of the config list, from the i button</item>

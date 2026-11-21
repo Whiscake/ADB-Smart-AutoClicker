@@ -211,6 +211,10 @@
     <string name="dialog_library_description">Description</string>
     <string name="dialog_library_info">Infos</string>
     <string name="dialog_library_no_match">Aucune configuration ne correspond.</string>
+    <string name="dialog_library_updated">Mise à jour</string>
+    <string name="dialog_library_sort">Tri</string>
+    <string name="dialog_library_sort_newest">Plus récentes</string>
+    <string name="dialog_library_sort_name">Nom</string>
     <string name="menu_news_item_title">Nouveautés</string>
     <string name="dialog_news_title">Nouveautés · %1$s</string>
     <string name="dialog_news_features">Fonctionnalités</string>

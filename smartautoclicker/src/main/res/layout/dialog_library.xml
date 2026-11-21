@@ -36,6 +36,27 @@
         android:importantForAutofill="no"/>
 
     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/item_height"
+        android:paddingStart="@dimen/margin_horizontal_default"
+        android:paddingEnd="@dimen/margin_horizontal_default"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="@dimen/library_filter_label_width"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="@string/dialog_library_sort"/>
+
+        <Spinner
+            android:id="@+id/sort"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/filters"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

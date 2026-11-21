@@ -252,6 +252,10 @@
     <string name="dialog_library_description">Description</string>
     <string name="dialog_library_info">Info</string>
     <string name="dialog_library_no_match">No config matches the search.</string>
+    <string name="dialog_library_updated">Updated</string>
+    <string name="dialog_library_sort">Sort</string>
+    <string name="dialog_library_sort_newest">Newest first</string>
+    <string name="dialog_library_sort_name">Name</string>
     <string name="menu_news_item_title">News</string>
     <string name="dialog_news_title">News · %1$s</string>
     <string name="dialog_news_features">Features</string>
