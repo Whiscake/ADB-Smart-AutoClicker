@@ -18,6 +18,8 @@
 <resources>
 
     <string-array name="news_features" translatable="false">
+        <item>Library: each config shows the date it was added or last updated, next to it and in its info page</item>
+        <item>Library: the list starts with the newest configs; Sort switches to names</item>
         <item>Library: ready-made configs to download, with an info page, colored tags, search and filters by resolution, author and tags</item>
         <item>A red ! on the Library button when the library changes, and on the i button when a new version of the clicker is out</item>
         <item>News page and a tutorial of the config list, from the i button</item>
@@ -31,6 +33,7 @@
     </string-array>
 
     <string-array name="news_fixes" translatable="false">
+        <item>When the emulator stops sending screen images (for example after the computer screen went to sleep), the clicker starts the screen capture again by itself instead of standing still</item>
         <item>Tapping a config while selecting configs to export or delete selects it instead of starting it</item>
         <item>The floating menu opens in the top right corner until you move it</item>
         <item>Two condition images with the same hash no longer replace each other when saving or importing</item>

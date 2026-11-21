@@ -22,6 +22,7 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.media.Image
 import android.media.projection.MediaProjectionManager
+import android.os.SystemClock
 import android.util.Log
 
 import com.buzbuz.smartautoclicker.domain.Repository
@@ -75,6 +76,8 @@ class DetectorEngine(context: Context) {
         private const val NO_IMAGE_DELAY_MS = 10L
         /** Waiting delay after an image failed to be processed. */
         private const val ERROR_DELAY_MS = 500L
+        /** With no new image for this long, the screen record is started again, as some emulators stop feeding it. */
+        private const val STALE_SCREEN_MS = 10_000L
         /** Singleton preventing multiple instances of the repository at the same time. */
         @Volatile
         private var INSTANCE: DetectorEngine? = null
@@ -389,10 +392,21 @@ class DetectorEngine(context: Context) {
      * An image that can't be processed is skipped, so one faulty event never stops the scenario.
      */
     private suspend fun processLatestImage(scenarioProcessor: ScenarioProcessor) {
+        var lastImageAt = SystemClock.elapsedRealtime()
         while (currentCoroutineContext().isActive) {
             try {
                 val image = screenRecorder.acquireLatestImage()
-                if (image == null) delay(NO_IMAGE_DELAY_MS) else image.use { scenarioProcessor.process(it) }
+                if (image != null) {
+                    lastImageAt = SystemClock.elapsedRealtime()
+                    image.use { scenarioProcessor.process(it) }
+                } else if (SystemClock.elapsedRealtime() - lastImageAt > STALE_SCREEN_MS) {
+                    Log.w(TAG, "No new screen image for ${STALE_SCREEN_MS / 1000}s, starting the screen record again")
+                    screenRecorder.stopScreenRecord()
+                    screenRecorder.startScreenRecord(appContext, screenMetrics.screenSize)
+                    lastImageAt = SystemClock.elapsedRealtime()
+                } else {
+                    delay(NO_IMAGE_DELAY_MS)
+                }
             } catch (ex: CancellationException) {
                 throw ex
             } catch (ex: Exception) {

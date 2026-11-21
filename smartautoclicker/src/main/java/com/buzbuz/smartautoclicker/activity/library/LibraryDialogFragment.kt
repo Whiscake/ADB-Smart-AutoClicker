@@ -86,8 +86,11 @@ class LibraryDialogFragment : DialogFragment() {
             if (viewModel.filter.value.isAdvanced) filters.visibility = View.VISIBLE
             filterResolution.onSelected { viewModel.setFilter(viewModel.filter.value.copy(screen = screens[it])) }
             filterAuthor.onSelected { viewModel.setFilter(viewModel.filter.value.copy(author = authors[it])) }
+            sort.setItems(listOf(R.string.dialog_library_sort_newest, R.string.dialog_library_sort_name).map(::getString))
+            sort.select(viewModel.filter.value.sort.ordinal)
+            sort.onSelected { viewModel.setFilter(viewModel.filter.value.copy(sort = LibrarySort.values()[it])) }
             btnClearFilters.setOnClickListener {
-                viewModel.setFilter(LibraryFilter(query = viewModel.filter.value.query))
+                viewModel.setFilter(LibraryFilter(query = viewModel.filter.value.query, sort = viewModel.filter.value.sort))
             }
         }
 
@@ -115,7 +118,7 @@ class LibraryDialogFragment : DialogFragment() {
             when (state) {
                 is LibraryState.Loaded -> {
                     updateFilters(state.configs, filter)
-                    val shown = state.configs.filter(filter::matches)
+                    val shown = viewModel.shown(state.configs, filter)
                     adapter.downloading = state.downloading
                     adapter.submit(shown)
                     list.visibility = if (shown.isEmpty()) View.GONE else View.VISIBLE
@@ -195,6 +198,7 @@ class LibraryDialogFragment : DialogFragment() {
             author.text = config.author.ifEmpty { "-" }
             resolution.text = config.screen?.let { "${it.x}x${it.y}" } ?: "-"
             events.text = config.events.takeIf { it > 0 }?.toString() ?: "-"
+            updated.text = config.updated.takeIf { it.isNotEmpty() }?.let(::displayDate) ?: "-"
             tags.text = LibraryTags.format(config.tags)
             rowTags.visibility = if (config.tags.isEmpty()) View.GONE else View.VISIBLE
             description.text = config.description
@@ -274,6 +278,7 @@ private class LibraryAdapter(
     private fun Context.details(config: LibraryConfig): String = listOfNotNull(
         config.screen?.let { getString(R.string.dialog_library_screen, it.x, it.y) },
         config.author.ifEmpty { null },
+        config.updated.ifEmpty { null }?.let(::displayDate),
     ).joinToString(" · ")
 
     class ViewHolder(val binding: ItemLibraryBinding) : RecyclerView.ViewHolder(binding.root)
