@@ -67,6 +67,12 @@ interface BitmapManager {
     suspend fun loadBitmap(path: String, width: Int, height: Int) : Bitmap?
 
     /**
+     * Load a bitmap on the calling thread, like [loadBitmap]. For a thread that may block but must not wait on another
+     * dispatcher, such as the screen detection thread.
+     */
+    fun loadBitmapNow(path: String, width: Int, height: Int) : Bitmap?
+
+    /**
      * Delete the specified bitmaps from the persistent memory.
      *
      * @param paths the paths of the bitmaps to be deleted.

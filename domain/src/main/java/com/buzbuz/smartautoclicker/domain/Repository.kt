@@ -222,6 +222,9 @@ interface Repository {
      */
     suspend fun getBitmap(path: String, width: Int, height: Int): Bitmap?
 
+    /** Like [getBitmap], on the calling thread, for the screen detection thread. */
+    fun getBitmapNow(path: String, width: Int, height: Int): Bitmap?
+
     /** Clean the cache of this repository. */
     fun cleanCache()
 

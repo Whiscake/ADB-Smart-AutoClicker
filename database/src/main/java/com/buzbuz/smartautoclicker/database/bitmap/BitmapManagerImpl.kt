@@ -81,11 +81,11 @@ internal class BitmapManagerImpl(private val appDataDir: File) : BitmapManager {
         return path
     }
 
-    override suspend fun loadBitmap(path: String, width: Int, height: Int) : Bitmap? {
-        var cachedBitmap = memoryCache.get(path)
-        if (cachedBitmap != null) {
-            return cachedBitmap
-        }
+    override suspend fun loadBitmap(path: String, width: Int, height: Int) : Bitmap? =
+        memoryCache.get(path) ?: withContext(Dispatchers.IO) { loadBitmapNow(path, width, height) }
+
+    override fun loadBitmapNow(path: String, width: Int, height: Int) : Bitmap? {
+        memoryCache.get(path)?.let { return it }
 
         val file = File(appDataDir, path)
         if (!file.exists()) {
@@ -93,23 +93,20 @@ internal class BitmapManagerImpl(private val appDataDir: File) : BitmapManager {
             return null
         }
 
-        return withContext(context = Dispatchers.IO) {
-            FileInputStream(file).use {
-                Log.d(TAG, "Loading $path")
+        return FileInputStream(file).use {
+            Log.d(TAG, "Loading $path")
 
-                val buffer = ByteBuffer.allocateDirect(it.channel.size().toInt())
-                it.channel.read(buffer)
-                buffer.position(0)
-                if (width <= 0 || height <= 0 || buffer.capacity() < width * height * 4) {
-                    Log.e(TAG, "Bitmap $path doesn't match its ${width}x$height area.")
-                    return@withContext null
-                }
+            val buffer = ByteBuffer.allocateDirect(it.channel.size().toInt())
+            it.channel.read(buffer)
+            buffer.position(0)
+            if (width <= 0 || height <= 0 || buffer.capacity() < width * height * 4) {
+                Log.e(TAG, "Bitmap $path doesn't match its ${width}x$height area.")
+                return null
+            }
 
-                cachedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-                cachedBitmap.copyPixelsFromBuffer(buffer)
-
-                memoryCache.put(path, cachedBitmap)
-                cachedBitmap
+            Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).also { bitmap ->
+                bitmap.copyPixelsFromBuffer(buffer)
+                memoryCache.put(path, bitmap)
             }
         }
     }
