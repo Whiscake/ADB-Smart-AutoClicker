@@ -33,6 +33,7 @@
     </string-array>
 
     <string-array name="news_fixes" translatable="false">
+        <item>The clicker could freeze for good on a screen (pause and play did not help, only turning it off and on): the detection waited on itself while loading a condition image. Condition images are now loaded on the detection thread itself</item>
         <item>When the emulator stops sending screen images (for example after the computer screen went to sleep), the clicker starts the screen capture again by itself instead of standing still</item>
         <item>Tapping a config while selecting configs to export or delete selects it instead of starting it</item>
         <item>The floating menu opens in the top right corner until you move it</item>

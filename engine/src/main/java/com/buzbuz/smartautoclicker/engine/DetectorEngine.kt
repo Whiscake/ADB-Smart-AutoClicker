@@ -50,7 +50,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 
@@ -290,10 +289,7 @@ class DetectorEngine(context: Context) {
                 detectionQuality = scenarioEndConditions.value!!.first.detectionQuality,
                 events = scenarioEvents.value,
                 bitmapSupplier = { path, width, height ->
-                    // We can run blocking here, we are on the screen detector thread
-                    runBlocking(Dispatchers.IO) {
-                        scenarioRepository.getBitmap(path, width, height)
-                    }
+                    scenarioRepository.getBitmapNow(path, width, height)
                 },
                 androidExecutor = androidExecutor!!,
                 endConditionOperator = scenarioEndConditions.value!!.first.endConditionOperator,
